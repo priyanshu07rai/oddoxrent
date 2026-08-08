@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Truck, Shield, AlertCircle, Package } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
@@ -7,6 +7,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import PriceDisplay from '../../components/ui/PriceDisplay';
 import useCart from '../../hooks/useCart';
+import useAuth from '../../hooks/useAuth';
 import { toast } from '../../components/ui/Toast';
 import * as paymentsApi from '../../api/payments';
 import * as rentalsApi from '../../api/rentals';
@@ -14,14 +15,32 @@ import * as rentalsApi from '../../api/rentals';
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cart, totalAmount, clearCart } = useCart();
+  const { user } = useAuth();
+  
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Form States
   const [deliveryMethod, setDeliveryMethod] = useState('delivery');
+  
+  // Smart pre-filled address state
   const [address, setAddress] = useState({
-    name: '', phone: '', line1: '', line2: '', city: '', state: '', zip: ''
+    name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'John Doe' : 'John Doe',
+    phone: user?.phone || '+91 98765 43210',
+    line1: '123 Main Street',
+    line2: 'Suite 4B',
+    city: 'New Delhi',
+    state: 'Delhi',
+    zip: '110001'
   });
+
+  useEffect(() => {
+    if (user) {
+      setAddress(prev => ({
+        ...prev,
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || prev.name,
+        phone: user.phone || prev.phone
+      }));
+    }
+  }, [user]);
 
   const steps = [
     { label: 'Review' },
@@ -171,7 +190,7 @@ const CheckoutPage = () => {
             </div>
           )}
 
-          {/* STEP 3: ADDRESS */}
+          {/* STEP 3: ADDRESS / CONTACT */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-xl font-extrabold text-text mb-6">
@@ -213,7 +232,6 @@ const CheckoutPage = () => {
                 <Button 
                   onClick={handleNext}
                   className="rounded-xl font-bold px-8"
-                  disabled={!address.name || !address.phone || (deliveryMethod === 'delivery' && (!address.line1 || !address.city))}
                 >
                   Continue
                 </Button>
