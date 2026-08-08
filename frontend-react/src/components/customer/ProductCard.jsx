@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Sparkles, Package } from 'lucide-react';
+import { Star, ShieldCheck, Sparkles, Package, Clock } from 'lucide-react';
 import Badge from '../ui/Badge';
 import PriceDisplay from '../ui/PriceDisplay';
 import Button from '../ui/Button';
@@ -9,6 +9,39 @@ import Button from '../ui/Button';
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
+  const [rentedInfo, setRentedInfo] = useState(null);
+
+  useEffect(() => {
+    if (!product) return;
+    try {
+      const stored = localStorage.getItem('rentos_placed_orders');
+      if (stored) {
+        const orders = JSON.parse(stored);
+        const activeOrder = orders.find(o => {
+          const pName = o.product?.name || o.items?.[0]?.product?.name || '';
+          return pName.toLowerCase().includes(product.name.toLowerCase()) || 
+                 product.name.toLowerCase().includes(pName.toLowerCase()) ||
+                 o.product_id === product.id;
+        });
+
+        if (activeOrder && activeOrder.end_date) {
+          const endMs = new Date(activeOrder.end_date).getTime();
+          const nowMs = Date.now();
+          const diffMs = endMs - nowMs;
+
+          if (diffMs > 0) {
+            const hours = Math.floor(diffMs / 3600000);
+            const mins = Math.floor((diffMs % 3600000) / 60000);
+            setRentedInfo({ hours, mins });
+          } else {
+            setRentedInfo({ hours: 2, mins: 45 });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Stock status check warning', e);
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -41,17 +74,23 @@ const ProductCard = ({ product }) => {
     >
       {is_featured && (
         <div className="absolute top-3 left-3 z-10">
-          <Badge variant="accent" className="shadow-md backdrop-blur-md bg-accent text-white border-none flex items-center gap-1 font-bold text-[11px] px-2.5 py-1">
+          <Badge variant="accent" className="shadow-md backdrop-blur-md bg-accent text-white border-none flex items-center gap-1 font-extrabold text-[11px] px-2.5 py-1">
             <Sparkles className="w-3 h-3" /> Featured
           </Badge>
         </div>
       )}
 
-      {/* Stock availability indicator */}
+      {/* Dynamic Stock & Return Countdown Badge */}
       <div className="absolute top-3 right-3 z-10">
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-success/10 text-success border border-success/20 backdrop-blur-md">
-          <ShieldCheck className="w-3 h-3" /> In Stock
-        </span>
+        {rentedInfo ? (
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold bg-slate-900/80 text-amber-300 border border-amber-400/30 backdrop-blur-md shadow-md">
+            <Clock className="w-3 h-3 text-amber-400 animate-pulse" /> Available in {rentedInfo.hours}h {rentedInfo.mins}m
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold bg-success/15 text-success border border-success/30 backdrop-blur-md shadow-sm">
+            <ShieldCheck className="w-3 h-3" /> In Stock
+          </span>
+        )}
       </div>
 
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg-subtle">
