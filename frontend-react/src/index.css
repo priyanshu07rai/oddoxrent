@@ -41,9 +41,9 @@
   --bg-subtle: #f1f5f9;
   --bg-overlay: #ffffff;
 
-  --border: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --border-strong: #cbd5e1;
+  --border: #cbd5e1;
+  --border-subtle: #e2e8f0;
+  --border-strong: #94a3b8;
 
   --text: #0f172a;
   --text-secondary: #334155;
@@ -74,9 +74,9 @@
   --bg-subtle: #18181b;
   --bg-overlay: #1e1e24;
 
-  --border: #27272a;
-  --border-subtle: #1f1f23;
-  --border-strong: #3f3f46;
+  --border: #3f3f46;
+  --border-subtle: #27272a;
+  --border-strong: #52525b;
 
   --text: #f4f4f5;
   --text-secondary: #a1a1aa;
@@ -116,11 +116,45 @@
     -ms-user-select: none;
   }
 
-  input, textarea, [contenteditable="true"], .select-text {
+  /* Global Form Field Distinct Base Styling */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="search"],
+  textarea,
+  select {
+    border: 1.5px solid var(--border-strong) !important;
+    background-color: var(--bg-subtle) !important;
+    color: var(--text) !important;
     user-select: text !important;
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="number"]:focus,
+  input[type="tel"]:focus,
+  input[type="date"]:focus,
+  input[type="search"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--accent) !important;
+    background-color: var(--bg-elevated) !important;
+    box-shadow: 0 0 0 3px var(--accent-subtle) !important;
+    outline: none !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.75;
   }
 
   ::selection {
@@ -154,6 +188,31 @@
     max-width: 80rem;
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  /* High contrast distinct input base */
+  .input-base {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1.5px solid var(--border-strong);
+    background-color: var(--bg-subtle);
+    color: var(--text);
+    padding: 0.65rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .input-base:hover {
+    border-color: var(--accent);
+    background-color: var(--bg-elevated);
+  }
+
+  .input-base:focus {
+    border-color: var(--accent);
+    background-color: var(--bg-elevated);
+    box-shadow: 0 0 0 3.5px var(--accent-subtle);
   }
 
   .card {

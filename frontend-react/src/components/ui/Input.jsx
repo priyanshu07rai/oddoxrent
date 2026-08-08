@@ -11,23 +11,23 @@ const Input = React.forwardRef(({
   const inputId = id || React.useId();
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className="w-full">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-text mb-1.5">
+        <label htmlFor={inputId} className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">
           {label}
         </label>
       )}
       <input
         id={inputId}
         ref={ref}
-        className={`input-base ${error ? 'border-danger focus:border-danger focus:ring-danger' : ''}`}
+        className={`input-base ${error ? 'border-danger focus:border-danger focus:ring-danger' : ''} ${className}`}
         {...rest}
       />
       {error && (
-        <p className="mt-1.5 text-sm text-danger">{error}</p>
+        <p className="mt-1.5 text-xs text-danger font-medium">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1.5 text-sm text-text-muted">{hint}</p>
+        <p className="mt-1.5 text-xs text-text-muted">{hint}</p>
       )}
     </div>
   );

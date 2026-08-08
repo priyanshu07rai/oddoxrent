@@ -1,12 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     class Role(models.TextChoices):
-        CUSTOMER = 'CUSTOMER', _('Customer')
-        ADMIN = 'ADMIN', _('Admin')
-        STAFF = 'STAFF', _('Staff')
+        CUSTOMER = 'CUSTOMER', ('Customer')
+        ADMIN = 'ADMIN', ('Admin')
+        STAFF = 'STAFF', ('Staff')
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
@@ -24,8 +23,8 @@ class CustomerProfile(models.Model):
 
 class Address(models.Model):
     class AddressType(models.TextChoices):
-        BILLING = 'BILLING', _('Billing')
-        SHIPPING = 'SHIPPING', _('Shipping')
+        BILLING = 'BILLING', ('Billing')
+        SHIPPING = 'SHIPPING', ('Shipping')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
     address_type = models.CharField(max_length=15, choices=AddressType.choices, default=AddressType.SHIPPING)
