@@ -19,6 +19,9 @@
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-subtle-hover: var(--accent-subtle-hover);
 
+  --color-teal: var(--teal);
+  --color-teal-hover: var(--teal-hover);
+
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);
 
@@ -31,73 +34,81 @@
   --color-info: var(--info);
   --color-info-subtle: var(--info-subtle);
 
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Light Mode Defaults (Primary Theme) */
+/* Official Odoo Theme Palette (Light Mode - Primary) */
 :root, [data-theme="light"] {
-  --bg: #f8fafc;
+  --bg: #f8f9fa;
   --bg-elevated: #ffffff;
-  --bg-subtle: #f1f5f9;
+  --bg-subtle: #f1f3f5;
   --bg-overlay: #ffffff;
 
-  --border: #cbd5e1;
-  --border-subtle: #e2e8f0;
-  --border-strong: #94a3b8;
+  --border: #dee2e6;
+  --border-subtle: #e9ecef;
+  --border-strong: #ced4da;
 
-  --text: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text: #212529;
+  --text-secondary: #495057;
+  --text-muted: #6c757d;
 
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-subtle: rgba(79, 70, 229, 0.08);
-  --accent-subtle-hover: rgba(79, 70, 229, 0.15);
+  /* Official Odoo Purple & Teal Palette */
+  --accent: #714b67;
+  --accent-hover: #5e3d55;
+  --accent-subtle: rgba(113, 75, 103, 0.08);
+  --accent-subtle-hover: rgba(113, 75, 103, 0.16);
 
-  --success: #16a34a;
-  --success-subtle: rgba(22, 163, 74, 0.1);
+  --teal: #00a09d;
+  --teal-hover: #008b88;
 
-  --warning: #d97706;
-  --warning-subtle: rgba(217, 119, 6, 0.1);
+  --success: #00a09d;
+  --success-subtle: rgba(0, 160, 157, 0.1);
 
-  --danger: #dc2626;
-  --danger-subtle: rgba(220, 38, 38, 0.1);
+  --warning: #e9573f;
+  --warning-subtle: rgba(233, 87, 63, 0.1);
 
-  --info: #0284c7;
-  --info-subtle: rgba(2, 132, 199, 0.1);
+  --danger: #d9534f;
+  --danger-subtle: rgba(217, 83, 79, 0.1);
+
+  --info: #01b0ac;
+  --info-subtle: rgba(1, 176, 172, 0.1);
 }
 
-/* Dark Mode Overrides */
+/* Odoo Dark Mode Theme */
 [data-theme="dark"] {
-  --bg: #09090b;
-  --bg-elevated: #121215;
-  --bg-subtle: #18181b;
-  --bg-overlay: #1e1e24;
+  --bg: #111827;
+  --bg-elevated: #1f2937;
+  --bg-subtle: #182232;
+  --bg-overlay: #283548;
 
-  --border: #3f3f46;
-  --border-subtle: #27272a;
-  --border-strong: #52525b;
+  --border: #374151;
+  --border-subtle: #2d3748;
+  --border-strong: #4b5563;
 
-  --text: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text: #f9fafb;
+  --text-secondary: #e5e7eb;
+  --text-muted: #9ca3af;
 
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-subtle: rgba(99, 102, 241, 0.14);
-  --accent-subtle-hover: rgba(99, 102, 241, 0.25);
+  /* Vibrant Odoo Dark Purple & Teal Accent */
+  --accent: #9d6b91;
+  --accent-hover: #b47fa8;
+  --accent-subtle: rgba(157, 107, 145, 0.18);
+  --accent-subtle-hover: rgba(157, 107, 145, 0.28);
 
-  --success: #22c55e;
-  --success-subtle: rgba(34, 197, 94, 0.14);
+  --teal: #01b0ac;
+  --teal-hover: #22d3ee;
 
-  --warning: #f59e0b;
-  --warning-subtle: rgba(245, 158, 11, 0.14);
+  --success: #01b0ac;
+  --success-subtle: rgba(1, 176, 172, 0.18);
+
+  --warning: #f87171;
+  --warning-subtle: rgba(248, 113, 113, 0.18);
 
   --danger: #ef4444;
-  --danger-subtle: rgba(239, 68, 68, 0.14);
+  --danger-subtle: rgba(239, 68, 68, 0.18);
 
   --info: #38bdf8;
-  --info-subtle: rgba(56, 189, 248, 0.14);
+  --info-subtle: rgba(56, 189, 248, 0.18);
 }
 
 @layer base {
@@ -116,7 +127,7 @@
     -ms-user-select: none;
   }
 
-  /* Global Form Field Distinct Base Styling */
+  /* Global Odoo Form Field Base Styling */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -158,7 +169,7 @@
   }
 
   ::selection {
-    background-color: rgba(99, 102, 241, 0.3);
+    background-color: rgba(113, 75, 103, 0.25);
     color: var(--text);
   }
 
@@ -190,7 +201,7 @@
     padding-right: 1rem;
   }
 
-  /* High contrast distinct input base */
+  /* Odoo input base styling */
   .input-base {
     width: 100%;
     border-radius: 0.75rem;
