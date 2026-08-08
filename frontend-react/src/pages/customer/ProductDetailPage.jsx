@@ -36,7 +36,7 @@ const ProductDetailPage = () => {
 
   const product = data?.data;
 
-  // Dynamic stock & availability countdown calculation
+  // Dynamic stock & availability countdown calculation for THIS specific product
   useEffect(() => {
     if (!product) return;
     try {
@@ -45,9 +45,10 @@ const ProductDetailPage = () => {
         const orders = JSON.parse(stored);
         const activeOrder = orders.find(o => {
           const pName = o.product?.name || o.items?.[0]?.product?.name || '';
-          return pName.toLowerCase().includes(product.name.toLowerCase()) || 
-                 product.name.toLowerCase().includes(pName.toLowerCase()) ||
-                 o.product_id === product.id;
+          return (pName && product.name && (
+            pName.toLowerCase().includes(product.name.toLowerCase()) || 
+            product.name.toLowerCase().includes(pName.toLowerCase())
+          )) || o.product_id === product.id;
         });
 
         if (activeOrder && activeOrder.end_date) {
@@ -61,9 +62,12 @@ const ProductDetailPage = () => {
             setRentedInfo({ hours, mins });
             setNextAvailableDate(activeOrder.end_date);
           } else {
-            setRentedInfo({ hours: 2, mins: 45 });
-            setNextAvailableDate(new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
+            setRentedInfo(null);
+            setNextAvailableDate(null);
           }
+        } else {
+          setRentedInfo(null);
+          setNextAvailableDate(null);
         }
       }
     } catch (e) {
@@ -184,7 +188,7 @@ const ProductDetailPage = () => {
             
             <div className="w-full h-[1px] bg-border mb-6" />
 
-            {/* Date Picker & Rental Options (Locked when Rented) */}
+            {/* Date Picker & Rental Options */}
             <div className="mb-6">
               <RentalDatePicker 
                 startDate={startDate}
@@ -200,7 +204,7 @@ const ProductDetailPage = () => {
               />
             </div>
 
-            {/* Delivery Option (Locked when Rented) */}
+            {/* Delivery Option */}
             <div className="mb-6">
               <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Delivery Option</label>
               <div className={`grid grid-cols-2 gap-3 transition-all ${rentedInfo ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -233,7 +237,7 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* CTA Buttons (Locked State Handling) */}
+            {/* CTA Buttons */}
             {rentedInfo ? (
               <div className="space-y-3 mb-6">
                 <Button 
@@ -273,7 +277,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Below fold: Tabs & Calendar */}
+        {/* Below fold: Tabs & Product-Specific Calendar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-8">
             <div className="flex overflow-x-auto gap-6 border-b border-border mb-8 scrollbar-hide">
@@ -320,7 +324,7 @@ const ProductDetailPage = () => {
           </div>
           
           <div className="lg:col-span-4">
-            <AvailabilityCalendar productId={product.id} unavailableDates={[]} />
+            <AvailabilityCalendar productId={product.id} productName={product.name} unavailableDates={[]} />
           </div>
         </div>
 

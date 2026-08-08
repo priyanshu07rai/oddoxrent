@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 
-const AvailabilityCalendar = ({ productId, unavailableDates = [] }) => {
+const AvailabilityCalendar = ({ productId, productName = '', unavailableDates = [] }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [bookedDateSet, setBookedDateSet] = useState(new Set());
   const [bookedRangeStr, setBookedRangeStr] = useState('');
@@ -15,8 +15,16 @@ const AvailabilityCalendar = ({ productId, unavailableDates = [] }) => {
       const stored = localStorage.getItem('rentos_placed_orders');
       if (stored) {
         const orders = JSON.parse(stored);
+        
         orders.forEach(o => {
-          if (o.start_date && o.end_date) {
+          const oName = o.product?.name || o.items?.[0]?.product?.name || '';
+          const matchId = productId && (o.product_id === productId || o.product?.id === productId);
+          const matchName = productName && oName && (
+            oName.toLowerCase().includes(productName.toLowerCase()) || 
+            productName.toLowerCase().includes(oName.toLowerCase())
+          );
+
+          if ((matchId || matchName) && o.start_date && o.end_date) {
             startStr = o.start_date;
             endStr = o.end_date;
 
@@ -38,10 +46,12 @@ const AvailabilityCalendar = ({ productId, unavailableDates = [] }) => {
     }
 
     setBookedDateSet(datesSet);
-    if (startStr && endStr) {
+    if (startStr && endStr && datesSet.size > 0) {
       setBookedRangeStr(`${startStr} → ${endStr}`);
+    } else {
+      setBookedRangeStr('');
     }
-  }, [productId, unavailableDates]);
+  }, [productId, productName, unavailableDates]);
 
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
