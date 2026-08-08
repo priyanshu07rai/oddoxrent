@@ -5,7 +5,6 @@ import { Star, ChevronRight, Store, ShoppingCart, ShieldCheck, Clock, Shield, Lo
 import PageTransition from '../../components/shared/PageTransition';
 import ProductGallery from '../../components/customer/ProductGallery';
 import RentalDatePicker from '../../components/customer/RentalDatePicker';
-import AvailabilityCalendar from '../../components/customer/AvailabilityCalendar';
 import Button from '../../components/ui/Button';
 import Skeleton from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
@@ -140,10 +139,10 @@ const ProductDetailPage = () => {
 
   return (
     <PageTransition>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Top Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-8">
           
           {/* Left: Gallery */}
           <div className="lg:col-span-7">
@@ -152,7 +151,7 @@ const ProductDetailPage = () => {
 
           {/* Right: Info & Actions */}
           <div className="lg:col-span-5 flex flex-col">
-            <nav className="flex items-center gap-2 text-xs font-medium text-text-muted mb-4">
+            <nav className="flex items-center gap-2 text-xs font-medium text-text-muted mb-3">
               <Link to="/explore" className="hover:text-accent transition-colors">Rentals</Link>
               <ChevronRight className="w-3 h-3" />
               <span className="capitalize text-accent font-semibold">{categoryName}</span>
@@ -174,21 +173,21 @@ const ProductDetailPage = () => {
             </div>
             
             {product.rating > 0 && (
-              <div className="flex items-center gap-2 mb-4 text-xs font-medium">
+              <div className="flex items-center gap-2 mb-3 text-xs font-medium">
                 <div className="flex text-warning"><Star className="w-4 h-4 fill-current" /></div>
                 <span className="font-bold text-text">{product.rating}</span>
                 <span className="text-text-muted">({product.review_count || 12} reviews)</span>
               </div>
             )}
 
-            <p className="text-sm text-text-secondary mb-6 leading-relaxed">
+            <p className="text-sm text-text-secondary mb-5 leading-relaxed">
               {product.short_description || product.description}
             </p>
             
-            <div className="w-full h-[1px] bg-border mb-6" />
+            <div className="w-full h-[1px] bg-border mb-5" />
 
             {/* Date Picker & Rental Options */}
-            <div className="mb-6">
+            <div className="mb-5">
               <RentalDatePicker 
                 startDate={startDate}
                 endDate={endDate}
@@ -204,7 +203,7 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Fulfillment Note: Store Pickup Only */}
-            <div className="mb-6 p-3.5 rounded-2xl bg-bg-subtle border border-border flex items-center gap-3">
+            <div className="mb-5 p-3 rounded-2xl bg-bg-subtle border border-border flex items-center gap-3">
               <div className="p-2 rounded-xl bg-accent/10 text-accent">
                 <Store className="w-5 h-5" />
               </div>
@@ -216,7 +215,7 @@ const ProductDetailPage = () => {
 
             {/* CTA Buttons */}
             {rentedInfo ? (
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-5">
                 <Button 
                   size="lg" 
                   disabled
@@ -239,7 +238,7 @@ const ProductDetailPage = () => {
             ) : (
               <Button 
                 size="lg" 
-                className="w-full flex items-center justify-center gap-2 mb-6 font-bold rounded-2xl py-3.5 shadow-md text-sm"
+                className="w-full flex items-center justify-center gap-2 mb-5 font-bold rounded-2xl py-3.5 shadow-md text-sm"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -254,54 +253,48 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Below fold: Tabs & Product-Specific Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8">
-            <div className="flex overflow-x-auto gap-6 border-b border-border mb-8 scrollbar-hide">
-              {['description', 'specifications', 'terms'].map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`pb-4 text-sm font-semibold capitalize whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? 'border-accent text-accent' : 'border-transparent text-text-muted hover:text-text'}`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            
-            <div className="text-sm text-text-secondary leading-relaxed">
-              {activeTab === 'description' && (
-                <div className="space-y-4">
-                  <p>{product.description || product.short_description}</p>
-                  {product.included_items && (
-                    <div className="mt-6 p-4 rounded-2xl bg-bg-elevated border border-border">
-                      <h4 className="font-bold text-text mb-2">What's Included:</h4>
-                      <p className="text-xs leading-relaxed">{product.included_items}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {activeTab === 'specifications' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {Object.entries(product.specifications || {}).map(([k, v]) => (
-                    <div key={k} className="py-2.5 px-3 rounded-xl bg-bg-elevated border border-border flex justify-between items-center text-xs">
-                      <span className="text-text-muted font-medium capitalize">{k.replace('_', ' ')}</span>
-                      <span className="font-bold text-text">{String(v)}</span>
-                    </div>
-                  ))}
-                  {Object.keys(product.specifications || {}).length === 0 && <p className="text-xs text-text-muted">Standard manufacturer specifications apply.</p>}
-                </div>
-              )}
-              {activeTab === 'terms' && (
-                <div className="p-4 rounded-2xl bg-bg-elevated border border-border text-xs leading-relaxed">
-                  <p>{product.rental_terms || 'Standard rental terms apply. Security deposit is fully refundable upon inspection.'}</p>
-                </div>
-              )}
-            </div>
+        {/* Product Details & Specifications Tabs (Compact Vertical Spacing) */}
+        <div className="mt-6 pt-6 border-t border-border">
+          <div className="flex overflow-x-auto gap-8 border-b border-border mb-6 scrollbar-hide">
+            {['description', 'specifications', 'terms'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-3 text-sm font-extrabold capitalize whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? 'border-accent text-accent' : 'border-transparent text-text-muted hover:text-text'}`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
           
-          <div className="lg:col-span-4">
-            <AvailabilityCalendar productId={product.id} productName={product.name} unavailableDates={[]} />
+          <div className="text-sm text-text-secondary leading-relaxed max-w-4xl">
+            {activeTab === 'description' && (
+              <div className="space-y-4">
+                <p className="text-sm leading-relaxed">{product.description || product.short_description}</p>
+                {product.included_items && (
+                  <div className="mt-4 p-5 rounded-3xl bg-bg-elevated border border-border shadow-xs">
+                    <h4 className="font-extrabold text-text text-sm mb-2">What's Included:</h4>
+                    <p className="text-xs text-text-secondary leading-relaxed font-medium">{product.included_items}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            {activeTab === 'specifications' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {Object.entries(product.specifications || {}).map(([k, v]) => (
+                  <div key={k} className="py-3 px-4 rounded-2xl bg-bg-elevated border border-border flex justify-between items-center text-xs shadow-xs">
+                    <span className="text-text-muted font-medium capitalize">{k.replace('_', ' ')}</span>
+                    <span className="font-bold text-text">{String(v)}</span>
+                  </div>
+                ))}
+                {Object.keys(product.specifications || {}).length === 0 && <p className="text-xs text-text-muted">Standard manufacturer specifications apply.</p>}
+              </div>
+            )}
+            {activeTab === 'terms' && (
+              <div className="p-5 rounded-3xl bg-bg-elevated border border-border text-xs leading-relaxed font-medium shadow-xs">
+                <p>{product.rental_terms || 'Standard rental terms apply. Security deposit is fully refundable upon inspection.'}</p>
+              </div>
+            )}
           </div>
         </div>
 
