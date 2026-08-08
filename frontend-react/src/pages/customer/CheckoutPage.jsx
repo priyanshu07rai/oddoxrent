@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Truck, Shield, AlertCircle, Package } from 'lucide-react';
+import { Store, Shield, AlertCircle, Package, CheckCircle2 } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import CheckoutSteps from '../../components/customer/CheckoutSteps';
 import Button from '../../components/ui/Button';
@@ -45,17 +45,17 @@ const CheckoutPage = () => {
   
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [deliveryMethod, setDeliveryMethod] = useState('delivery');
+  const [deliveryMethod, setDeliveryMethod] = useState('pickup');
   
   // Smart pre-filled address state
   const [address, setAddress] = useState({
     name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'John Doe' : 'John Doe',
     phone: user?.phone || '+91 98765 43210',
-    line1: '123 Main Street',
-    line2: 'Suite 4B',
-    city: 'New Delhi',
-    state: 'Delhi',
-    zip: '110001'
+    line1: 'RentOS Central Hub, Main Street',
+    line2: 'Sector 62',
+    city: 'Noida',
+    state: 'Uttar Pradesh',
+    zip: '201301'
   });
 
   useEffect(() => {
@@ -70,8 +70,8 @@ const CheckoutPage = () => {
 
   const steps = [
     { label: 'Review' },
-    { label: 'Method' },
-    { label: 'Address' },
+    { label: 'Pickup Hub' },
+    { label: 'Contact Info' },
     { label: 'Payment' }
   ];
 
@@ -127,7 +127,7 @@ const CheckoutPage = () => {
       rental_amount: calcRental,
       deposit_amount: calcDeposit,
       total_price: calculatedTotal,
-      delivery_method: deliveryMethod,
+      delivery_method: 'pickup',
       address: address,
       created_at: new Date().toISOString(),
       start_date: itemsList[0]?.start_date || itemsList[0]?.startDate || new Date().toISOString().split('T')[0],
@@ -138,13 +138,13 @@ const CheckoutPage = () => {
     saveOrderToStorage(newOrderObj);
 
     try {
-      await rentalsApi.createOrder({ cart, deliveryMethod, address });
+      await rentalsApi.createOrder({ cart, deliveryMethod: 'pickup', address });
     } catch (err) {
       console.warn('Backend order API skipped/fallback', err);
     }
 
     clearCart();
-    toast.success('Rental order reserved successfully!');
+    toast.success('Rental order reserved for Store Pickup successfully!');
     setIsProcessing(false);
     navigate(`/order-confirmation/${generatedId}`);
   };
@@ -220,84 +220,63 @@ const CheckoutPage = () => {
             </div>
           )}
 
-          {/* STEP 2: METHOD */}
+          {/* STEP 2: PICKUP HUB */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-extrabold text-text mb-6">Choose Fulfillment Method</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div 
-                  onClick={() => setDeliveryMethod('pickup')}
-                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center text-center gap-3 ${deliveryMethod === 'pickup' ? 'border-accent bg-accent-subtle/50' : 'border-border bg-bg-elevated hover:border-border-strong'}`}
-                >
-                  <Store className={`w-8 h-8 ${deliveryMethod === 'pickup' ? 'text-accent' : 'text-text-muted'}`} />
+              <h2 className="text-xl font-extrabold text-text mb-6">Store Pickup Fulfillment Hub</h2>
+              
+              <div className="p-6 rounded-2xl border-2 border-accent bg-accent-subtle/40 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-accent text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <Store className="w-6 h-6" />
+                  </div>
                   <div>
-                    <h4 className="font-bold text-text mb-1">Store Pickup</h4>
-                    <p className="text-xs text-text-muted">Free • Collect from central store hub</p>
+                    <div className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase text-accent mb-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Central Store Hub (Primary)
+                    </div>
+                    <h3 className="font-extrabold text-text text-base">RentOS Central Gear Store</h3>
+                    <p className="text-xs text-text-muted mt-1">Main Street, Sector 62, Noida, UP 201301</p>
+                    <p className="text-xs font-bold text-success mt-1">Open Daily: 9:00 AM – 9:00 PM</p>
                   </div>
                 </div>
-                <div 
-                  onClick={() => setDeliveryMethod('delivery')}
-                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center text-center gap-3 ${deliveryMethod === 'delivery' ? 'border-accent bg-accent-subtle/50' : 'border-border bg-bg-elevated hover:border-border-strong'}`}
-                >
-                  <Truck className={`w-8 h-8 ${deliveryMethod === 'delivery' ? 'text-accent' : 'text-text-muted'}`} />
-                  <div>
-                    <h4 className="font-bold text-text mb-1">Doorstep Delivery</h4>
-                    <p className="text-xs text-text-muted">Direct doorstep delivery & return pick-up</p>
-                  </div>
+
+                <div className="bg-bg-elevated px-4 py-2 rounded-xl border border-border text-xs font-extrabold text-text shrink-0">
+                  Free Pickup & Return
                 </div>
               </div>
+
               <div className="flex justify-between mt-8">
                 <Button variant="ghost" onClick={handleBack} className="rounded-xl font-bold">Back</Button>
-                <Button onClick={handleNext} className="rounded-xl font-bold px-8">Continue</Button>
+                <Button onClick={handleNext} className="rounded-xl font-bold px-8">Confirm Pickup Hub</Button>
               </div>
             </div>
           )}
 
-          {/* STEP 3: ADDRESS */}
+          {/* STEP 3: CONTACT INFO */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-extrabold text-text mb-6">
-                {deliveryMethod === 'delivery' ? 'Delivery Address' : 'Contact Information'}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Full Name</label>
-                  <Input value={address.name} onChange={e => setAddress({...address, name: e.target.value})} placeholder="John Doe" className="bg-bg-subtle border-border" />
-                </div>
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Phone Number</label>
-                  <Input value={address.phone} onChange={e => setAddress({...address, phone: e.target.value})} placeholder="+91 98765 43210" className="bg-bg-subtle border-border" />
-                </div>
-                
-                {deliveryMethod === 'delivery' && (
-                  <>
-                    <div className="col-span-1 md:col-span-2 mt-2 border-t border-border-subtle pt-4">
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Address Line 1</label>
-                      <Input value={address.line1} onChange={e => setAddress({...address, line1: e.target.value})} placeholder="House / Flat No., Building" className="bg-bg-subtle border-border" />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Address Line 2</label>
-                      <Input value={address.line2} onChange={e => setAddress({...address, line2: e.target.value})} placeholder="Street, Area, Landmark" className="bg-bg-subtle border-border" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">City</label>
-                      <Input value={address.city} onChange={e => setAddress({...address, city: e.target.value})} placeholder="New Delhi" className="bg-bg-subtle border-border" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Pincode</label>
-                      <Input value={address.zip} onChange={e => setAddress({...address, zip: e.target.value})} placeholder="110001" className="bg-bg-subtle border-border" />
-                    </div>
-                  </>
-                )}
+              <h2 className="text-xl font-extrabold text-text mb-6">Contact & Verification Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <Input 
+                  label="Full Name" 
+                  value={address.name} 
+                  onChange={(e) => setAddress(prev => ({ ...prev, name: e.target.value }))}
+                />
+                <Input 
+                  label="Phone Number" 
+                  value={address.phone} 
+                  onChange={(e) => setAddress(prev => ({ ...prev, phone: e.target.value }))}
+                />
               </div>
+
+              <div className="p-4 rounded-2xl bg-bg-subtle border border-border mb-6">
+                <span className="text-xs font-bold text-text block mb-1">Government ID Requirement at Pickup</span>
+                <span className="text-xs text-text-muted">Please present a valid Government ID (Aadhaar / Driving License / Passport) at the store hub during gear collection.</span>
+              </div>
+
               <div className="flex justify-between mt-8">
                 <Button variant="ghost" onClick={handleBack} className="rounded-xl font-bold">Back</Button>
-                <Button 
-                  onClick={handleNext}
-                  className="rounded-xl font-bold px-8"
-                >
-                  Continue
-                </Button>
+                <Button onClick={handleNext} className="rounded-xl font-bold px-8">Proceed to Payment</Button>
               </div>
             </div>
           )}
@@ -305,52 +284,46 @@ const CheckoutPage = () => {
           {/* STEP 4: PAYMENT */}
           {step === 4 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-extrabold text-text mb-6">Confirm & Pay</h2>
+              <h2 className="text-xl font-extrabold text-text mb-6">Payment & Escrow Confirmation</h2>
               
-              <div className="bg-bg-subtle p-4 rounded-2xl mb-6 flex gap-3 items-start border border-border">
-                <Shield className="w-5 h-5 text-success shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-bold text-text text-sm">Escrow Protected Payment</h4>
-                  <p className="text-xs text-text-muted">Security deposits are held in escrow and released immediately upon return verification.</p>
+              <div className="p-5 rounded-2xl bg-bg-subtle border border-border mb-6 space-y-3">
+                <div className="flex justify-between text-xs font-medium">
+                  <span className="text-text-muted">Rental Fee</span>
+                  <PriceDisplay amount={calcRental} className="font-bold text-text" />
+                </div>
+                <div className="flex justify-between text-xs font-medium">
+                  <span className="text-text-muted">Escrow Security Deposit (Refundable)</span>
+                  <PriceDisplay amount={calcDeposit} className="font-bold text-success" />
+                </div>
+                <div className="flex justify-between text-xs font-medium">
+                  <span className="text-text-muted">Store Pickup Convenience Fee</span>
+                  <span className="font-bold text-success">FREE</span>
+                </div>
+                <div className="border-t border-border pt-3 flex justify-between text-base font-bold">
+                  <span className="text-text">Total Payable Now</span>
+                  <PriceDisplay amount={calculatedTotal} className="font-black text-xl text-accent" />
                 </div>
               </div>
 
-              <div className="bg-accent-subtle border border-accent/20 p-4 rounded-2xl mb-6 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-accent shrink-0" />
-                <p className="text-xs text-accent font-medium">Demo Payment Gateway Mode — Auto-approved instant confirmation.</p>
+              <div className="p-4 rounded-2xl bg-accent-subtle border border-accent/30 text-accent text-xs font-bold flex items-center gap-2 mb-8">
+                <Shield className="w-4 h-4 shrink-0" />
+                Your security deposit is held safely in Escrow and automatically refunded upon gear return inspection.
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div>
-                  <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Demo Card Number</label>
-                  <Input value="4242 •••• •••• 4242" readOnly className="font-mono text-text-muted bg-bg-subtle border-border" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Expiry</label>
-                    <Input value="12/30" readOnly className="font-mono text-text-muted bg-bg-subtle border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">CVV</label>
-                    <Input value="•••" readOnly className="font-mono text-text-muted bg-bg-subtle border-border" type="password" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">
-                <Button variant="ghost" onClick={handleBack} disabled={isProcessing} className="rounded-xl font-bold">Back</Button>
+              <div className="flex justify-between">
+                <Button variant="ghost" onClick={handleBack} className="rounded-xl font-bold">Back</Button>
                 <Button 
-                  size="lg" 
                   onClick={handlePayment} 
-                  disabled={isProcessing}
-                  className="rounded-xl font-bold px-8 shadow-md"
+                  loading={isProcessing}
+                  size="lg" 
+                  className="rounded-xl font-extrabold px-8 shadow-md"
                 >
-                  {isProcessing ? 'Processing Order...' : `Pay ₹${calculatedTotal.toLocaleString()}`}
+                  Pay ₹{calculatedTotal.toLocaleString()} & Confirm Order
                 </Button>
               </div>
             </div>
           )}
-          
+
         </div>
       </div>
     </PageTransition>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Star, ChevronRight, Store, Truck, ShoppingCart, ShieldCheck, Clock, Shield, Lock, Calendar } from 'lucide-react';
+import { Star, ChevronRight, Store, ShoppingCart, ShieldCheck, Clock, Shield, Lock, Calendar } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import ProductGallery from '../../components/customer/ProductGallery';
 import RentalDatePicker from '../../components/customer/RentalDatePicker';
@@ -24,7 +24,6 @@ const ProductDetailPage = () => {
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(defaultEndStr);
   const [selectedPricing, setSelectedPricing] = useState(null);
-  const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [activeTab, setActiveTab] = useState('description');
   const [rentedInfo, setRentedInfo] = useState(null);
   const [nextAvailableDate, setNextAvailableDate] = useState(null);
@@ -116,7 +115,7 @@ const ProductDetailPage = () => {
       startDate: sDate,
       endDate: eDate,
       pricing: selectedPricing || { price: product.price, period_name: 'Daily' },
-      deliveryMethod,
+      deliveryMethod: 'pickup',
       quantity: 1
     });
     toast.success('Added to rental cart!');
@@ -132,7 +131,7 @@ const ProductDetailPage = () => {
       startDate: futureStart,
       endDate: futureEnd,
       pricing: selectedPricing || { price: product.price, period_name: 'Daily Pass' },
-      deliveryMethod,
+      deliveryMethod: 'pickup',
       quantity: 1
     });
     toast.success(`Pre-reserved upcoming slot starting ${futureStart}!`);
@@ -204,36 +203,14 @@ const ProductDetailPage = () => {
               />
             </div>
 
-            {/* Delivery Option */}
-            <div className="mb-6">
-              <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Delivery Option</label>
-              <div className={`grid grid-cols-2 gap-3 transition-all ${rentedInfo ? 'opacity-50 pointer-events-none' : ''}`}>
-                <div 
-                  onClick={() => !rentedInfo && setDeliveryMethod('delivery')}
-                  className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all ${
-                    rentedInfo 
-                      ? 'border-border bg-bg-subtle cursor-not-allowed opacity-60'
-                      : deliveryMethod === 'delivery' 
-                        ? 'border-accent bg-accent-subtle text-accent font-bold shadow-sm cursor-pointer' 
-                        : 'border-border bg-bg-elevated hover:border-border-strong text-text-muted hover:text-text cursor-pointer'
-                  }`}
-                >
-                  <Truck className="w-5 h-5" />
-                  <span className="text-xs">Doorstep Delivery</span>
-                </div>
-                <div 
-                  onClick={() => !rentedInfo && setDeliveryMethod('pickup')}
-                  className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all ${
-                    rentedInfo 
-                      ? 'border-border bg-bg-subtle cursor-not-allowed opacity-60'
-                      : deliveryMethod === 'pickup' 
-                        ? 'border-accent bg-accent-subtle text-accent font-bold shadow-sm cursor-pointer' 
-                        : 'border-border bg-bg-elevated hover:border-border-strong text-text-muted hover:text-text cursor-pointer'
-                  }`}
-                >
-                  <Store className="w-5 h-5" />
-                  <span className="text-xs">Store Pickup</span>
-                </div>
+            {/* Fulfillment Note: Store Pickup Only */}
+            <div className="mb-6 p-3.5 rounded-2xl bg-bg-subtle border border-border flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-accent/10 text-accent">
+                <Store className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-text block">Fulfillment Method</span>
+                <span className="text-xs text-text-muted">Store Pickup at Central Hub (Free)</span>
               </div>
             </div>
 

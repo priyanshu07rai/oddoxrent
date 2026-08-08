@@ -136,7 +136,7 @@ const HomePage = () => {
           >
             <div className="flex items-center gap-2"><Package className="w-4 h-4 text-accent" /> 500+ Verified Items</div>
             <div className="flex items-center gap-2"><Lock className="w-4 h-4 text-accent" /> 100% Refundable Deposit</div>
-            <div className="flex items-center gap-2"><RotateCcw className="w-4 h-4 text-accent" /> Doorstep Delivery & Returns</div>
+            <div className="flex items-center gap-2"><Store className="w-4 h-4 text-accent" /> Instant Store Pickup & Returns</div>
           </motion.div>
         </div>
       </section>

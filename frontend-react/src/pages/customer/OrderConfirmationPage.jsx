@@ -86,8 +86,8 @@ const OrderConfirmationPage = () => {
         </motion.div>
 
         <h1 className="text-3xl sm:text-4xl font-black text-text mb-2 text-center">Rental Booking Confirmed!</h1>
-        <p className="text-sm text-text-muted text-center max-w-md mb-10 leading-relaxed font-medium">
-          Your rental order has been reserved successfully. You will receive real-time SMS & email notifications for dispatch and delivery tracking.
+        <p className="text-sm text-text-muted mb-8 max-w-md">
+          Your rental order has been reserved successfully for Store Pickup. Please bring a valid Govt ID to collect your gear at the Central Hub.
         </p>
 
         {/* Order Details Card */}
@@ -113,7 +113,7 @@ const OrderConfirmationPage = () => {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-text-muted font-medium">Fulfillment Choice</span>
-              <span className="font-bold text-text capitalize text-right">{order.delivery_method || 'Doorstep Delivery'}</span>
+              <span className="font-bold text-accent font-extrabold text-right">Store Pickup (Central Hub)</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-text-muted font-medium">Return Deadline</span>

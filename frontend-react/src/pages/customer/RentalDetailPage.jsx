@@ -154,7 +154,7 @@ const RentalDetailPage = () => {
                   onClick={() => setActiveTab(tab)}
                   className={`pb-3 text-sm font-extrabold capitalize whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? 'border-accent text-accent' : 'border-transparent text-text-muted hover:text-text'}`}
                 >
-                  {tab === 'details' ? 'Delivery Details' : tab === 'financial' ? 'Escrow & Deposit' : 'Tax Invoice'}
+                  {tab === 'details' ? 'Fulfillment & Pickup' : tab === 'financial' ? 'Escrow & Deposit' : 'Tax Invoice'}
                 </button>
               ))}
             </div>
@@ -164,10 +164,13 @@ const RentalDetailPage = () => {
                 <div className="space-y-6">
                   <div className="bg-bg-elevated border border-border rounded-3xl p-6 shadow-sm">
                     <h3 className="font-extrabold text-text text-base mb-4 flex items-center gap-2">
-                      {order.delivery_method === 'delivery' ? <Truck className="w-4 h-4 text-accent" /> : <Store className="w-4 h-4 text-accent" />}
-                      {order.delivery_method === 'delivery' ? 'Doorstep Delivery Address' : 'Store Pickup Address'}
+                      <Store className="w-4 h-4 text-accent" /> Store Pickup Location
                     </h3>
                     <div className="text-xs text-text-secondary space-y-1.5 leading-relaxed font-medium">
+                      <p className="font-bold text-text text-sm">RentOS Central Gear Store</p>
+                      <p>Main Street, Sector 62, Noida, UP 201301</p>
+                      <p className="text-success font-bold mt-1">Store Hours: Open Daily 9:00 AM – 9:00 PM</p>
+                    </div>
                       <p className="font-bold text-text text-sm">{order.address?.name || 'John Doe'}</p>
                       <p>{order.address?.phone || '+91 98765 43210'}</p>
                       <p>{order.address?.line1 || '123 Main Street, Suite 4B'}</p>
