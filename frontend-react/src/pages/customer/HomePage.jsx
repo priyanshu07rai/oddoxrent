@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Package, Laptop, Sofa, Car, Camera, Music, Shield, Eye, Lock, RotateCcw, Search, Calendar, ChevronRight } from 'lucide-react';
+import { Package, Laptop, Sofa, Car, Camera, Music, Shield, Eye, Lock, RotateCcw, Search, Calendar, ChevronRight, Store } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import ScrollReveal from '../../components/shared/ScrollReveal';
 import Button from '../../components/ui/Button';
