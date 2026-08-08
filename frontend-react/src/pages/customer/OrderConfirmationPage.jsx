@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import PriceDisplay from '../../components/ui/PriceDisplay';
 import Skeleton from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
+import VendorMap from '../../components/shared/VendorMap';
 import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 import * as rentalsApi from '../../api/rentals';
 
@@ -142,6 +143,20 @@ const OrderConfirmationPage = () => {
               <PriceDisplay amount={totalCharged} className="text-accent font-black text-xl" />
             </div>
           </div>
+        </div>
+
+        {/* Interactive Vendor Store Map for Pickup */}
+        <div className="w-full mb-8">
+          <VendorMap 
+            vendorLat={order.vendor_latitude || 28.6145}
+            vendorLon={order.vendor_longitude || 77.2095}
+            shopName={order.vendor_shop_name || 'RentOS Pro Vendor Hub'}
+            areaName={order.vendor_area_name || 'Connaught Place Hub'}
+            address={order.vendor_address || 'Block A, Inner Circle, Connaught Place, New Delhi 110001'}
+            customerLat={28.6139}
+            customerLon={77.2090}
+            distanceKm={1.8}
+          />
         </div>
 
         {/* Action Buttons */}

@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
-import { Plus, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Upload, Image as ImageIcon, MapPin, Navigation } from 'lucide-react';
+import { getCurrentCustomerLocation, DEFAULT_CUSTOMER_LOCATION } from '../../utils/geoUtils';
 
 export default function ProductForm({ product = null, onSave, onCancel, loading = false }) {
+  const [vendorLocation, setVendorLocation] = useState({
+    latitude: product?.vendor_latitude || DEFAULT_CUSTOMER_LOCATION.latitude,
+    longitude: product?.vendor_longitude || DEFAULT_CUSTOMER_LOCATION.longitude,
+    area_name: product?.vendor_area_name || DEFAULT_CUSTOMER_LOCATION.area_name
+  });
+
+  useEffect(() => {
+    if (!product?.vendor_latitude) {
+      getCurrentCustomerLocation().then(loc => {
+        setVendorLocation(loc);
+      });
+    }
+  }, [product]);
+
   const [formData, setFormData] = useState({
     name: product?.name || '',
     category_id: product?.category_id || '',
@@ -63,6 +78,9 @@ export default function ProductForm({ product = null, onSave, onCancel, loading 
 
     onSave({
       ...formData,
+      vendor_latitude: vendorLocation.latitude,
+      vendor_longitude: vendorLocation.longitude,
+      vendor_area_name: vendorLocation.area_name,
       specifications: specsObj,
       pricing
     });

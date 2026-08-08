@@ -8,9 +8,11 @@ import RentalDatePicker from '../../components/customer/RentalDatePicker';
 import Button from '../../components/ui/Button';
 import Skeleton from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
+import VendorMap from '../../components/shared/VendorMap';
 import { toast } from '../../components/ui/Toast';
 import * as productsApi from '../../api/products';
 import useCart from '../../hooks/useCart';
+import { getCurrentCustomerLocation, enrichProductLocation, DEFAULT_CUSTOMER_LOCATION } from '../../utils/geoUtils';
 
 const ProductDetailPage = () => {
   const { slug } = useParams();
@@ -32,7 +34,8 @@ const ProductDetailPage = () => {
     queryFn: () => productsApi.getProduct(slug)
   });
 
-  const product = data?.data;
+  const rawProduct = data?.data;
+  const product = rawProduct ? enrichProductLocation(rawProduct, DEFAULT_CUSTOMER_LOCATION.latitude, DEFAULT_CUSTOMER_LOCATION.longitude) : null;
 
   // Dynamic stock & availability countdown calculation for THIS specific product
   useEffect(() => {

@@ -6,6 +6,7 @@ import CheckoutSteps from '../../components/customer/CheckoutSteps';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import PriceDisplay from '../../components/ui/PriceDisplay';
+import VendorMap from '../../components/shared/VendorMap';
 import useCart from '../../hooks/useCart';
 import useAuth from '../../hooks/useAuth';
 import { toast } from '../../components/ui/Toast';
@@ -225,26 +226,19 @@ const CheckoutPage = () => {
           {/* STEP 2: PICKUP HUB */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-extrabold text-text mb-6">Store Pickup Fulfillment Hub</h2>
+              <h2 className="text-xl font-extrabold text-text mb-4">Store Pickup Fulfillment Hub</h2>
               
-              <div className="p-6 rounded-2xl border-2 border-accent bg-accent-subtle/40 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-accent text-white flex items-center justify-center shrink-0 shadow-sm">
-                    <Store className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase text-accent mb-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Central Store Hub (Primary)
-                    </div>
-                    <h3 className="font-extrabold text-text text-base">RentOS Central Gear Store</h3>
-                    <p className="text-xs text-text-muted mt-1">Main Street, Sector 62, Noida, UP 201301</p>
-                    <p className="text-xs font-bold text-success mt-1">Open Daily: 9:00 AM – 9:00 PM</p>
-                  </div>
-                </div>
-
-                <div className="bg-bg-elevated px-4 py-2 rounded-xl border border-border text-xs font-extrabold text-text shrink-0">
-                  Free Pickup & Return
-                </div>
+              <div className="mb-6">
+                <VendorMap 
+                  vendorLat={itemsList[0]?.product?.vendor_latitude || 28.6145}
+                  vendorLon={itemsList[0]?.product?.vendor_longitude || 77.2095}
+                  shopName={itemsList[0]?.product?.vendor_shop_name || 'RentOS Pro Vendor Store'}
+                  areaName={itemsList[0]?.product?.vendor_area_name || 'Connaught Place Hub'}
+                  address={itemsList[0]?.product?.vendor_address || 'Block A, Inner Circle, Connaught Place, New Delhi 110001'}
+                  customerLat={28.6139}
+                  customerLon={77.2090}
+                  distanceKm={itemsList[0]?.product?.distance_km || 1.8}
+                />
               </div>
 
               <div className="flex justify-between mt-8">

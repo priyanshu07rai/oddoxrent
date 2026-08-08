@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Sparkles, Package, Clock } from 'lucide-react';
+import { Star, ShieldCheck, Sparkles, Package, Clock, Navigation } from 'lucide-react';
 import Badge from '../ui/Badge';
 import PriceDisplay from '../ui/PriceDisplay';
 import Button from '../ui/Button';
@@ -48,7 +48,7 @@ const ProductCard = ({ product }) => {
   const {
     id, name, slug, short_description, images, primary_image,
     category, category_name, pricings, rating, review_count,
-    is_featured, price
+    is_featured, price, distance_km, vendor_area_name
   } = product;
 
   // Resolve image URL
@@ -111,13 +111,18 @@ const ProductCard = ({ product }) => {
       </div>
       
       <div className="flex flex-col flex-grow p-5">
-        {categoryLabel && (
-          <div className="mb-1.5">
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          {categoryLabel && (
             <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
               {categoryLabel}
             </span>
-          </div>
-        )}
+          )}
+          {distance_km !== undefined && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-accent bg-accent-subtle px-2 py-0.5 rounded-md border border-accent/20">
+              <Navigation className="w-3 h-3 text-accent" /> {distance_km} km
+            </span>
+          )}
+        </div>
 
         <h3 className="font-extrabold text-text text-base line-clamp-1 mb-1.5 group-hover:text-accent transition-colors">
           {name}
