@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Bell, Menu, X, User, Sun, Moon, Compass, Package } from 'lucide-react';
+import { ShoppingCart, Bell, Menu, X, User, Sun, Moon, Compass, Package, Home } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
 import useCart from '../../hooks/useCart';
 import useNotifications from '../../hooks/useNotifications';
@@ -44,8 +44,19 @@ const Navbar = () => {
           <span className="font-black text-xl tracking-tight text-text">RentOS</span>
         </Link>
 
-        {/* Desktop Nav Pills */}
-        <nav className="hidden md:flex items-center gap-2 bg-bg-elevated/80 border border-border p-1.5 rounded-2xl shadow-xs">
+        {/* Desktop Nav Pills (Home, Explore, My Rentals) */}
+        <nav className="hidden md:flex items-center gap-1.5 bg-bg-elevated/90 border border-border p-1.5 rounded-2xl shadow-xs">
+          <Link 
+            to="/"
+            className={`px-4 py-2 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all ${
+              location.pathname === '/' 
+                ? 'bg-accent text-white shadow-sm' 
+                : 'text-text-secondary hover:text-text hover:bg-bg-subtle'
+            }`}
+          >
+            <Home className="w-4 h-4" /> Home
+          </Link>
+
           <Link 
             to="/explore"
             className={`px-4 py-2 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all ${
@@ -85,47 +96,52 @@ const Navbar = () => {
           </button>
 
           {/* Cart Icon */}
-          <Link to="/cart" className="relative p-2.5 rounded-2xl text-text-secondary hover:text-text hover:bg-bg-subtle border border-border transition-all">
+          <Link 
+            to="/cart" 
+            className="relative p-2.5 rounded-2xl text-text-secondary hover:text-text hover:bg-bg-subtle border border-border transition-all"
+            title="View Cart"
+          >
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-md">
+              <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border-2 border-bg-elevated shadow-xs">
                 {totalItems}
               </span>
             )}
           </Link>
 
+          {/* User Auth Info */}
           {isAuthenticated ? (
             <>
-              <button className="relative p-2.5 rounded-2xl text-text-secondary hover:text-text hover:bg-bg-subtle border border-border transition-all">
+              <Link 
+                to="/account" 
+                className="relative p-2.5 rounded-2xl text-text-secondary hover:text-text hover:bg-bg-subtle border border-border transition-all"
+                title="Account Notifications"
+              >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full"></span>
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-danger rounded-full" />
                 )}
-              </button>
-              
-              {/* User Dropdown */}
-              <div className="relative group">
-                <button className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-accent/30 transition-all ml-1">
-                  <div className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-extrabold text-sm shadow-md">
-                    {user?.first_name?.charAt(0) || user?.email?.charAt(0) || <User className="w-4 h-4" />}
-                  </div>
-                </button>
+              </Link>
 
-                <div className="absolute right-0 top-full mt-2 w-56 py-2 bg-bg-elevated border border-border rounded-3xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right scale-95 group-hover:scale-100 z-50">
-                  <div className="px-4 py-2.5 border-b border-border-subtle mb-1">
-                    <p className="text-sm font-extrabold truncate text-text">{user?.first_name} {user?.last_name}</p>
-                    <p className="text-xs text-text-muted truncate">{user?.email}</p>
+              <div className="flex items-center gap-2 pl-2 border-l border-border">
+                <Link to="/account" className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-bg-subtle transition-all">
+                  <div className="w-8 h-8 rounded-xl bg-accent-subtle text-accent font-bold text-xs flex items-center justify-center border border-accent/20">
+                    {user?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
+                  <span className="text-xs font-bold text-text max-w-[100px] truncate">{user?.full_name?.split(' ')[0] || 'Account'}</span>
+                </Link>
+
+                <div className="flex items-center gap-1">
                   {isAdmin && (
-                    <Link to="/admin" className="block px-4 py-2 text-sm text-accent font-bold hover:bg-bg-subtle transition-colors">
-                      Admin Dashboard
+                    <Link to="/admin/dashboard" className="text-xs font-bold text-accent bg-accent-subtle px-2.5 py-1 rounded-lg hover:bg-accent/20 transition-all">
+                      Admin
                     </Link>
                   )}
-                  <Link to="/account" className="block px-4 py-2 text-sm font-semibold text-text hover:text-accent hover:bg-bg-subtle transition-colors">
-                    Account Settings
-                  </Link>
-                  <button onClick={logout} className="w-full text-left px-4 py-2 text-sm font-semibold text-danger hover:bg-danger/10 transition-colors">
-                    Sign Out
+                  <button 
+                    onClick={logout}
+                    className="text-xs font-semibold text-text-muted hover:text-danger px-2 py-1 transition-colors"
+                  >
+                    Logout
                   </button>
                 </div>
               </div>
@@ -170,6 +186,9 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-full left-0 right-0 bg-bg-elevated border-b border-border shadow-2xl p-4 flex flex-col gap-3 md:hidden z-40"
           >
+            <Link to="/" className="text-base font-bold p-3 hover:bg-bg-subtle rounded-xl text-text flex items-center gap-2">
+              <Home className="w-5 h-5 text-accent" /> Home Page
+            </Link>
             <Link to="/explore" className="text-base font-bold p-3 hover:bg-bg-subtle rounded-xl text-text flex items-center gap-2">
               <Compass className="w-5 h-5 text-accent" /> Explore Products
             </Link>
@@ -179,14 +198,29 @@ const Navbar = () => {
             
             {isAuthenticated ? (
               <>
-                {isAdmin && <Link to="/admin" className="text-base font-bold text-accent p-3 hover:bg-bg-subtle rounded-xl">Admin Dashboard</Link>}
-                <Link to="/account" className="text-base font-bold p-3 hover:bg-bg-subtle rounded-xl text-text">Account Settings</Link>
-                <button onClick={logout} className="text-base font-bold text-danger text-left p-3 hover:bg-danger/10 rounded-xl">Sign Out</button>
+                <Link to="/account" className="text-base font-bold p-3 hover:bg-bg-subtle rounded-xl text-text flex items-center gap-2">
+                  <User className="w-5 h-5 text-accent" /> Account Settings
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin/dashboard" className="text-base font-bold p-3 hover:bg-bg-subtle rounded-xl text-accent flex items-center gap-2">
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button 
+                  onClick={logout}
+                  className="text-base font-bold p-3 text-danger hover:bg-danger-subtle rounded-xl text-left transition-colors"
+                >
+                  Logout
+                </button>
               </>
             ) : (
-              <div className="flex flex-col gap-2 mt-2 pt-3 border-t border-border-subtle">
-                <Link to="/login" className="btn-secondary py-3 text-center rounded-xl font-bold">Log in</Link>
-                <Link to="/register" className="btn-primary py-3 text-center rounded-xl font-bold">Sign up</Link>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                <Link to="/login" className="w-full text-center py-3 font-bold text-text bg-bg-subtle rounded-xl">
+                  Log in
+                </Link>
+                <Link to="/register" className="w-full text-center py-3 font-bold text-white bg-accent rounded-xl shadow-md">
+                  Sign up
+                </Link>
               </div>
             )}
           </motion.div>
