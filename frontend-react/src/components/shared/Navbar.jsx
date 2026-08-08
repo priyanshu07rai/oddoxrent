@@ -34,7 +34,7 @@ const Navbar = () => {
           : 'h-20 bg-transparent'
       }`}
     >
-      <div className="max-w-7xl h-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="max-w-7xl h-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between relative">
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 z-50 group">
@@ -44,8 +44,8 @@ const Navbar = () => {
           <span className="font-black text-xl tracking-tight text-text">RentOS</span>
         </Link>
 
-        {/* Desktop Nav Pills (Home, Explore, My Rentals) */}
-        <nav className="hidden md:flex items-center gap-1.5 bg-bg-elevated/90 border border-border p-1.5 rounded-2xl shadow-xs">
+        {/* Desktop Nav Pills (Dead Centered) */}
+        <nav className="hidden md:flex items-center gap-1.5 bg-bg-elevated/90 border border-border p-1.5 rounded-2xl shadow-xs absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-40">
           <Link 
             to="/"
             className={`px-4 py-2 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all ${
