@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Star, ChevronRight, Store, Truck, ShoppingCart, ShieldCheck, Clock, Shield } from 'lucide-react';
+import { Star, ChevronRight, Store, Truck, ShoppingCart, ShieldCheck, Clock, Shield, Lock, Calendar } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import ProductGallery from '../../components/customer/ProductGallery';
 import RentalDatePicker from '../../components/customer/RentalDatePicker';
@@ -15,6 +15,7 @@ import useCart from '../../hooks/useCart';
 
 const ProductDetailPage = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   
   const todayStr = new Date().toISOString().split('T')[0];
@@ -26,6 +27,7 @@ const ProductDetailPage = () => {
   const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [activeTab, setActiveTab] = useState('description');
   const [rentedInfo, setRentedInfo] = useState(null);
+  const [nextAvailableDate, setNextAvailableDate] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['product', slug],
@@ -57,8 +59,10 @@ const ProductDetailPage = () => {
             const hours = Math.floor(diffMs / 3600000);
             const mins = Math.floor((diffMs % 3600000) / 60000);
             setRentedInfo({ hours, mins });
+            setNextAvailableDate(activeOrder.end_date);
           } else {
             setRentedInfo({ hours: 2, mins: 45 });
+            setNextAvailableDate(new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
           }
         }
       }
@@ -112,6 +116,23 @@ const ProductDetailPage = () => {
       quantity: 1
     });
     toast.success('Added to rental cart!');
+    navigate('/cart');
+  };
+
+  const handlePreReserveNextSlot = () => {
+    const futureStart = nextAvailableDate || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0];
+    const futureEnd = new Date(new Date(futureStart).getTime() + 3 * 86400000).toISOString().split('T')[0];
+
+    addToCart({
+      product,
+      startDate: futureStart,
+      endDate: futureEnd,
+      pricing: selectedPricing || { price: product.price, period_name: 'Daily Pass' },
+      deliveryMethod,
+      quantity: 1
+    });
+    toast.success(`Pre-reserved upcoming slot starting ${futureStart}!`);
+    navigate('/cart');
   };
 
   return (
@@ -163,6 +184,7 @@ const ProductDetailPage = () => {
             
             <div className="w-full h-[1px] bg-border mb-6" />
 
+            {/* Date Picker & Rental Options (Locked when Rented) */}
             <div className="mb-6">
               <RentalDatePicker 
                 startDate={startDate}
@@ -173,22 +195,37 @@ const ProductDetailPage = () => {
                 selectedPricing={selectedPricing}
                 onPricingSelect={setSelectedPricing}
                 basePrice={product.price}
+                isRented={!!rentedInfo}
+                rentedInfo={rentedInfo}
               />
             </div>
 
+            {/* Delivery Option (Locked when Rented) */}
             <div className="mb-6">
               <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Delivery Option</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className={`grid grid-cols-2 gap-3 transition-all ${rentedInfo ? 'opacity-50 pointer-events-none' : ''}`}>
                 <div 
-                  onClick={() => setDeliveryMethod('delivery')}
-                  className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 cursor-pointer transition-all ${deliveryMethod === 'delivery' ? 'border-accent bg-accent-subtle text-accent font-bold shadow-sm' : 'border-border bg-bg-elevated hover:border-border-strong text-text-muted hover:text-text'}`}
+                  onClick={() => !rentedInfo && setDeliveryMethod('delivery')}
+                  className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all ${
+                    rentedInfo 
+                      ? 'border-border bg-bg-subtle cursor-not-allowed opacity-60'
+                      : deliveryMethod === 'delivery' 
+                        ? 'border-accent bg-accent-subtle text-accent font-bold shadow-sm cursor-pointer' 
+                        : 'border-border bg-bg-elevated hover:border-border-strong text-text-muted hover:text-text cursor-pointer'
+                  }`}
                 >
                   <Truck className="w-5 h-5" />
                   <span className="text-xs">Doorstep Delivery</span>
                 </div>
                 <div 
-                  onClick={() => setDeliveryMethod('pickup')}
-                  className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 cursor-pointer transition-all ${deliveryMethod === 'pickup' ? 'border-accent bg-accent-subtle text-accent font-bold shadow-sm' : 'border-border bg-bg-elevated hover:border-border-strong text-text-muted hover:text-text'}`}
+                  onClick={() => !rentedInfo && setDeliveryMethod('pickup')}
+                  className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all ${
+                    rentedInfo 
+                      ? 'border-border bg-bg-subtle cursor-not-allowed opacity-60'
+                      : deliveryMethod === 'pickup' 
+                        ? 'border-accent bg-accent-subtle text-accent font-bold shadow-sm cursor-pointer' 
+                        : 'border-border bg-bg-elevated hover:border-border-strong text-text-muted hover:text-text cursor-pointer'
+                  }`}
                 >
                   <Store className="w-5 h-5" />
                   <span className="text-xs">Store Pickup</span>
@@ -196,14 +233,38 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            <Button 
-              size="lg" 
-              className="w-full flex items-center justify-center gap-2 mb-4 font-bold rounded-2xl py-3.5 shadow-md text-sm"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              Add to Cart & Reserve
-            </Button>
+            {/* CTA Buttons (Locked State Handling) */}
+            {rentedInfo ? (
+              <div className="space-y-3 mb-6">
+                <Button 
+                  size="lg" 
+                  disabled
+                  className="w-full flex items-center justify-center gap-2 font-bold rounded-2xl py-3.5 text-sm bg-bg-subtle text-text-muted border border-border cursor-not-allowed opacity-65"
+                >
+                  <Lock className="w-4 h-4 text-text-muted" />
+                  Locked • Out on Rental (Available in {rentedInfo.hours}h {rentedInfo.mins}m)
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="w-full flex items-center justify-center gap-2 font-bold rounded-2xl py-3 text-sm text-accent border border-accent/40 bg-accent-subtle/50 shadow-sm"
+                  onClick={handlePreReserveNextSlot}
+                >
+                  <Calendar className="w-4 h-4 text-accent" />
+                  Pre-Reserve Upcoming Slot ({nextAvailableDate || 'Next Slot'})
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                size="lg" 
+                className="w-full flex items-center justify-center gap-2 mb-6 font-bold rounded-2xl py-3.5 shadow-md text-sm"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                Add to Cart & Reserve
+              </Button>
+            )}
             
             <div className="flex items-center justify-center gap-4 text-xs text-text-muted">
               <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-accent" /> Escrow Protected Deposit</span>

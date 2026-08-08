@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Input from '../ui/Input';
 import PriceDisplay from '../ui/PriceDisplay';
+import { Clock, Lock } from 'lucide-react';
 
 const RentalDatePicker = ({ 
   startDate, 
@@ -10,7 +11,9 @@ const RentalDatePicker = ({
   pricings = [], 
   onPricingSelect, 
   selectedPricing,
-  basePrice = 0 
+  basePrice = 0,
+  isRented = false,
+  rentedInfo = null
 }) => {
   const today = new Date().toISOString().split('T')[0];
   
@@ -31,7 +34,6 @@ const RentalDatePicker = ({
     ? pricings 
     : [{ id: 'base', period_name: 'Daily Pass', price: basePrice, security_deposit: 0 }];
 
-  // Auto select first pricing option if none selected
   useEffect(() => {
     if (!selectedPricing && optionsList.length > 0 && onPricingSelect) {
       onPricingSelect(optionsList[0]);
@@ -53,16 +55,30 @@ const RentalDatePicker = ({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Rented Status Alert Banner */}
+      {isRented && (
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-amber-500 shrink-0 animate-pulse" />
+            Currently Out on Rental • Unlocks in {rentedInfo?.hours || 62}h {rentedInfo?.mins || 30}m
+          </span>
+          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 px-2 py-0.5 rounded-full">
+            <Lock className="w-3 h-3" /> Locked
+          </span>
+        </div>
+      )}
+
       {/* Dates Selection */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid grid-cols-2 gap-4 transition-all ${isRented ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
           <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">Pick-up Date</label>
           <Input 
             type="date"
             min={today}
+            disabled={isRented}
             value={startDate || defaultStart}
             onChange={(e) => onStartChange(e.target.value)}
-            className="w-full bg-bg-elevated border-border text-text font-semibold"
+            className="w-full bg-bg-elevated border-border text-text font-semibold disabled:bg-bg-subtle disabled:cursor-not-allowed"
           />
         </div>
         <div>
@@ -70,15 +86,16 @@ const RentalDatePicker = ({
           <Input 
             type="date"
             min={minEndDate}
+            disabled={isRented}
             value={endDate || defaultEnd}
             onChange={(e) => onEndChange(e.target.value)}
-            className="w-full bg-bg-elevated border-border text-text font-semibold"
+            className="w-full bg-bg-elevated border-border text-text font-semibold disabled:bg-bg-subtle disabled:cursor-not-allowed"
           />
         </div>
       </div>
 
       {/* Plans Selection */}
-      <div className="mt-2">
+      <div className={`mt-2 transition-all ${isRented ? 'opacity-50 pointer-events-none' : ''}`}>
         <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Select Rental Plan</label>
         <div className="grid grid-cols-1 gap-2.5">
           {optionsList.map((pricing) => {
@@ -87,11 +104,13 @@ const RentalDatePicker = ({
             return (
               <div 
                 key={pricing.id}
-                onClick={() => onPricingSelect && onPricingSelect(pricing)}
-                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                  isSelected 
-                    ? 'border-accent bg-accent-subtle shadow-sm' 
-                    : 'border-border bg-bg-elevated hover:border-border-strong'
+                onClick={() => !isRented && onPricingSelect && onPricingSelect(pricing)}
+                className={`p-3.5 rounded-2xl border transition-all ${
+                  isRented 
+                    ? 'border-border bg-bg-subtle cursor-not-allowed opacity-60' 
+                    : isSelected 
+                      ? 'border-accent bg-accent-subtle shadow-sm cursor-pointer' 
+                      : 'border-border bg-bg-elevated hover:border-border-strong cursor-pointer'
                 }`}
               >
                 <div className="flex justify-between items-center">
@@ -108,7 +127,7 @@ const RentalDatePicker = ({
       </div>
 
       {/* Upfront Total */}
-      <div className="mt-2 p-4 rounded-2xl bg-bg-subtle border border-border flex justify-between items-center">
+      <div className={`mt-2 p-4 rounded-2xl bg-bg-subtle border border-border flex justify-between items-center transition-all ${isRented ? 'opacity-50' : ''}`}>
         <div>
           <span className="text-xs text-text-muted uppercase tracking-wider font-semibold block">Total Estimated Cost</span>
           <span className="text-xs text-text-secondary">{daysCount} day{daysCount > 1 ? 's' : ''} @ ₹{unitPrice}/day</span>
