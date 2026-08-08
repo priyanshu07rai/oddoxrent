@@ -122,6 +122,8 @@ const CheckoutPage = () => {
     const newOrderObj = {
       id: generatedId,
       order_number: generatedId,
+      user_email: user?.email || 'guest@rentos.io',
+      user_id: user?.id || null,
       status: 'active',
       items: itemsList,
       rental_amount: calcRental,

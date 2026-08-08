@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, Check, Package, Plus, Sparkles, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Package } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import RentalCard from '../../components/customer/RentalCard';
 import Skeleton from '../../components/ui/Skeleton';
@@ -9,6 +9,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { toast } from '../../components/ui/Toast';
+import useAuth from '../../hooks/useAuth';
 import * as rentalsApi from '../../api/rentals';
 
 const sampleProductMap = {
@@ -26,6 +27,7 @@ const MyRentalsPage = () => {
   const [activeTab, setActiveTab] = useState('active');
   const [selectedRentalToExtend, setSelectedRentalToExtend] = useState(null);
   const [extendDays, setExtendDays] = useState(2);
+  const { user } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-rentals'],
@@ -45,9 +47,37 @@ const MyRentalsPage = () => {
   const apiRentals = data?.data || [];
   const combined = [...localOrders, ...apiRentals];
 
+  // User-scoped filtering: Each user sees ONLY their own orders
+  const currentUserEmail = user?.email?.toLowerCase();
+  const currentUserId = user?.id;
+
+  const userScopedList = combined.filter(item => {
+    if (!item) return false;
+
+    if (currentUserEmail || currentUserId) {
+      const orderEmail = (item.user_email || item.customer_email || item.customer?.email || item.address?.email || '').toLowerCase();
+      const orderUserId = item.user_id || item.customer?.id || item.customer_id;
+
+      // If the order has an associated user email/id, verify match
+      if (orderEmail && currentUserEmail) {
+        return orderEmail === currentUserEmail;
+      }
+      if (orderUserId && currentUserId) {
+        return String(orderUserId) === String(currentUserId);
+      }
+      // If order was created in guest mode before login, keep it for current guest session
+      if (!orderEmail && !orderUserId) {
+        return true;
+      }
+      return false;
+    }
+
+    return true;
+  });
+
   // Deduplicate orders
   const uniqueMap = new Map();
-  combined.forEach(item => {
+  userScopedList.forEach(item => {
     if (item && item.id && !uniqueMap.has(item.id)) {
       uniqueMap.set(item.id, item);
     }
@@ -110,7 +140,9 @@ const MyRentalsPage = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
           <div>
-            <span className="text-xs font-bold text-accent uppercase tracking-wider">Rental Dashboard</span>
+            <span className="text-xs font-bold text-accent uppercase tracking-wider">
+              {user ? `${user.full_name || user.email}'s Dashboard` : 'Personal Dashboard'}
+            </span>
             <h1 className="text-3xl font-black text-text mt-1">My Active Gear Rentals</h1>
           </div>
 
@@ -151,7 +183,7 @@ const MyRentalsPage = () => {
             <EmptyState 
               icon={<Package className="w-12 h-12 text-accent" />}
               title={`No ${activeTab === 'active' ? 'Active' : 'Past'} Rentals`}
-              description={activeTab === 'active' ? "You don't have any gear currently out on rental." : "Your past returned rentals will appear here."}
+              description={activeTab === 'active' ? "You don't have any gear currently out on rental under your account." : "Your past returned rentals will appear here."}
             />
           ) : (
             <motion.div 
