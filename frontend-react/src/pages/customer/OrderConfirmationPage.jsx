@@ -1,14 +1,26 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { CheckCircle2, Download, FileText, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Check, Download, FileText, Package } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import Button from '../../components/ui/Button';
 import PriceDisplay from '../../components/ui/PriceDisplay';
 import Skeleton from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
+import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 import * as rentalsApi from '../../api/rentals';
-import * as invoicesApi from '../../api/invoices';
+
+const sampleProductMap = {
+  1: { name: 'Sony FX3 Cinema Camera Kit', price: 2500, deposit: 10000 },
+  2: { name: 'Apple MacBook Pro 16" M3 Max', price: 3000, deposit: 15000 },
+  3: { name: 'Super73-RX Electric Adventure Bike', price: 1800, deposit: 5000 },
+  4: { name: 'DJI Inspire 3 Cinema Drone 8K', price: 8000, deposit: 25000 },
+  5: { name: 'Herman Miller Aeron Ergonomic Chair', price: 600, deposit: 3000 },
+  6: { name: 'JBL PartyBox Ultimate PA System', price: 2000, deposit: 8000 },
+  7: { name: 'EcoFlow Delta Pro Power Station', price: 1500, deposit: 6000 },
+  8: { name: 'Apple Vision Pro 512GB VR Headset', price: 4000, deposit: 20000 }
+};
 
 const OrderConfirmationPage = () => {
   const { orderId } = useParams();
@@ -16,77 +28,72 @@ const OrderConfirmationPage = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['order', orderId],
-    queryFn: () => rentalsApi.getOrderById(orderId),
+    queryFn: () => rentalsApi.getOrder(orderId),
+    enabled: !!orderId,
     retry: false
   });
 
-  if (isLoading) {
+  // Try reading order from local storage if placed during guest / demo checkout
+  let localOrder = null;
+  try {
+    const stored = localStorage.getItem('rentos_placed_orders');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      localOrder = parsed.find(o => o.id === orderId || o.order_number === orderId);
+    }
+  } catch (e) {
+    console.warn('LocalStorage order read error', e);
+  }
+
+  const order = data?.data || localOrder || {
+    id: orderId || 'RNT-892014',
+    order_number: orderId || 'RNT-892014',
+    status: 'active',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+    rental_amount: 1800,
+    deposit_amount: 5000,
+    total_price: 6800,
+    delivery_method: 'pickup',
+    product: { name: 'Super73-RX Electric Adventure Bike' }
+  };
+
+  if (isLoading && !localOrder) {
     return (
       <PageTransition>
-        <div className="max-w-2xl mx-auto px-4 py-20 flex flex-col items-center">
-          <Skeleton className="w-24 h-24 rounded-full mb-8" />
+        <div className="max-w-3xl mx-auto px-4 py-16 flex flex-col items-center">
+          <Skeleton className="w-20 h-20 rounded-full mb-6" />
           <Skeleton className="w-64 h-8 mb-4" />
-          <Skeleton className="w-96 h-4 mb-12" />
           <Skeleton className="w-full h-64 rounded-3xl" />
         </div>
       </PageTransition>
     );
   }
 
-  // Resolve order from local storage or API data
-  let localOrders = [];
-  try {
-    const stored = localStorage.getItem('rentos_placed_orders');
-    if (stored) localOrders = JSON.parse(stored);
-  } catch (e) {
-    console.warn('LocalStorage read error', e);
-  }
+  const productName = order.product?.name || order.items?.[0]?.product?.name || sampleProductMap[order.product_id]?.name || 'Super73-RX Electric Adventure Bike';
+  const startDate = order.start_date || order.items?.[0]?.start_date || new Date().toISOString().split('T')[0];
+  const endDate = order.end_date || order.items?.[0]?.end_date || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0];
 
-  const foundLocal = localOrders.find(o => o.id === orderId || o.order_number === orderId);
-  const apiOrder = data?.data;
-
-  const order = foundLocal || apiOrder || {
-    id: orderId,
-    order_number: orderId,
-    status: 'active',
-    rental_amount: 1800,
-    deposit_amount: 5000,
-    total_price: 6800,
-    delivery_method: 'Doorstep Delivery',
-    start_date: new Date().toISOString().split('T')[0],
-    end_date: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
-    product: { name: 'Super73-RX Electric Adventure Bike' }
-  };
-
-  const productName = order.product?.name || order.items?.[0]?.product?.name || 'Super73-RX Electric Adventure Bike';
-  const startDate = order.start_date || new Date().toISOString().split('T')[0];
-  const endDate = order.end_date || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0];
-  const rentalFee = parseFloat(order.rental_amount || 1800);
-  const depositFee = parseFloat(order.deposit_amount || 5000);
-  const totalCharged = parseFloat(order.total_price || rentalFee + depositFee);
+  const rentalFee = order.rental_amount || (order.total_price ? Math.max(1000, order.total_price - (order.deposit_amount || 5000)) : 1800);
+  const depositFee = order.deposit_amount || 5000;
+  const totalCharged = order.total_price || (rentalFee + depositFee);
 
   return (
     <PageTransition>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex flex-col items-center">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center">
         
-        {/* Success Animated Badge */}
+        {/* Success Icon */}
         <motion.div 
-          className="w-20 h-20 bg-success/15 text-success rounded-full flex items-center justify-center mb-6 shadow-sm border border-success/30"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          className="w-20 h-20 rounded-full bg-success/15 text-success flex items-center justify-center mb-6 shadow-md border border-success/30"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <Check className="w-10 h-10" strokeWidth={3} />
-          </motion.div>
+          <CheckCircle2 className="w-12 h-12" />
         </motion.div>
 
         <h1 className="text-3xl sm:text-4xl font-black text-text mb-2 text-center">Rental Booking Confirmed!</h1>
-        <p className="text-sm text-text-muted mb-8 max-w-md">
+        <p className="text-sm text-text-muted mb-8 max-w-md text-center">
           Your rental order has been reserved successfully for Store Pickup. Please bring a valid Govt ID to collect your gear at the Central Hub.
         </p>
 
@@ -141,25 +148,26 @@ const OrderConfirmationPage = () => {
         <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
           <Button 
             variant="secondary" 
-            className="rounded-xl font-bold flex items-center justify-center gap-2"
-            onClick={() => invoicesApi.downloadInvoice(orderId)}
+            className="rounded-xl font-bold flex items-center justify-center gap-2 py-3 border-accent/40 text-accent bg-accent-subtle/40 hover:bg-accent-subtle shadow-sm"
+            onClick={() => generateInvoicePDF(order)}
           >
-            <Download className="w-4 h-4" /> Download Invoice
+            <Download className="w-4 h-4" /> Download Tax Invoice
           </Button>
           <Button 
             onClick={() => navigate('/my-rentals')}
-            className="rounded-xl font-bold flex items-center justify-center gap-2 shadow-md"
+            className="rounded-xl font-bold flex items-center justify-center gap-2 shadow-md py-3"
           >
             <FileText className="w-4 h-4" /> View My Rentals
           </Button>
           <Button 
             variant="ghost" 
-            className="rounded-xl font-bold"
+            className="rounded-xl font-bold py-3"
             onClick={() => navigate('/explore')}
           >
             Browse More Gear
           </Button>
         </div>
+
       </div>
     </PageTransition>
   );

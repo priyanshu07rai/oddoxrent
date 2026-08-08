@@ -9,6 +9,7 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import PriceDisplay from '../../components/ui/PriceDisplay';
 import Skeleton from '../../components/ui/Skeleton';
+import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 import * as rentalsApi from '../../api/rentals';
 import * as invoicesApi from '../../api/invoices';
 
@@ -211,8 +212,8 @@ const RentalDetailPage = () => {
                   <p className="text-xs text-text-muted text-center max-w-xs mb-6 leading-relaxed">
                     Download official tax invoice with deposit breakdown and order receipt.
                   </p>
-                  <Button size="lg" className="rounded-xl font-bold px-6 shadow-md" onClick={() => invoicesApi.downloadInvoice(orderId)}>
-                    Download PDF Invoice
+                  <Button size="lg" className="rounded-xl font-bold px-6 shadow-md" onClick={() => generateInvoicePDF(order)}>
+                    Download Tax Invoice
                   </Button>
                 </div>
               )}
