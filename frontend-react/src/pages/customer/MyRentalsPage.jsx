@@ -54,25 +54,26 @@ const MyRentalsPage = () => {
   const userScopedList = combined.filter(item => {
     if (!item) return false;
 
+    // If user is logged in as a specific account (e.g. AB@GMAIL.COM)
     if (currentUserEmail || currentUserId) {
       const orderEmail = (item.user_email || item.customer_email || item.customer?.email || item.address?.email || '').toLowerCase();
       const orderUserId = item.user_id || item.customer?.id || item.customer_id;
 
-      // If the order has an associated user email/id, verify match
+      // Show order ONLY if email or user_id explicitly matches the logged in user
       if (orderEmail && currentUserEmail) {
         return orderEmail === currentUserEmail;
       }
       if (orderUserId && currentUserId) {
         return String(orderUserId) === String(currentUserId);
       }
-      // If order was created in guest mode before login, keep it for current guest session
-      if (!orderEmail && !orderUserId) {
-        return true;
-      }
+
+      // If an order has NO email or user ID, do NOT show it to a logged-in account
       return false;
     }
 
-    return true;
+    // Guest mode: Show unassigned guest session orders
+    const orderEmail = (item.user_email || item.customer_email || item.customer?.email || '').toLowerCase();
+    return !orderEmail || orderEmail === 'guest@rentos.io';
   });
 
   // Deduplicate orders

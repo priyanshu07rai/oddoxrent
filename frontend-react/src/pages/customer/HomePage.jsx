@@ -81,7 +81,7 @@ const HomePage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <div className="flex flex-col gap-1 p-2.5 rounded-2xl bg-bg-subtle border border-border-subtle">
+            <div className="flex flex-col gap-1 p-3 rounded-2xl bg-bg-subtle border border-border hover:border-accent transition-colors">
               <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                 <Search className="w-3 h-3 text-accent" /> Search Item
               </label>
@@ -90,11 +90,11 @@ const HomePage = () => {
                 placeholder="Camera, Laptop, E-Bike..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-sm text-text font-semibold outline-none placeholder:text-text-muted/60"
+                className="quick-search-input text-sm text-text font-semibold placeholder:text-text-muted/60"
               />
             </div>
 
-            <div className="flex flex-col gap-1 p-2.5 rounded-2xl bg-bg-subtle border border-border-subtle">
+            <div className="flex flex-col gap-1 p-3 rounded-2xl bg-bg-subtle border border-border hover:border-accent transition-colors">
               <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-accent" /> Pick-up Date
               </label>
@@ -102,11 +102,11 @@ const HomePage = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent text-sm text-text font-semibold outline-none cursor-pointer"
+                className="quick-search-input text-sm text-text font-semibold cursor-pointer"
               />
             </div>
 
-            <div className="flex flex-col gap-1 p-2.5 rounded-2xl bg-bg-subtle border border-border-subtle">
+            <div className="flex flex-col gap-1 p-3 rounded-2xl bg-bg-subtle border border-border hover:border-accent transition-colors">
               <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-accent" /> Return Date
               </label>
@@ -114,7 +114,7 @@ const HomePage = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent text-sm text-text font-semibold outline-none cursor-pointer"
+                className="quick-search-input text-sm text-text font-semibold cursor-pointer"
               />
             </div>
 

@@ -128,12 +128,12 @@
   }
 
   /* Global Odoo Form Field Base Styling */
-  input[type="text"],
+  input[type="text"]:not(.quick-search-input),
   input[type="email"],
   input[type="password"],
   input[type="number"],
   input[type="tel"],
-  input[type="date"],
+  input[type="date"]:not(.quick-search-input),
   input[type="search"],
   textarea,
   select {
@@ -147,12 +147,12 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   }
 
-  input[type="text"]:focus,
+  input[type="text"]:not(.quick-search-input):focus,
   input[type="email"]:focus,
   input[type="password"]:focus,
   input[type="number"]:focus,
   input[type="tel"]:focus,
-  input[type="date"]:focus,
+  input[type="date"]:not(.quick-search-input):focus,
   input[type="search"]:focus,
   textarea:focus,
   select:focus {
@@ -199,6 +199,16 @@
     max-width: 80rem;
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  /* Seamless Quick Search Input */
+  .quick-search-input {
+    border: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 2px 0 !important;
+    margin: 0 !important;
   }
 
   /* Odoo input base styling */
