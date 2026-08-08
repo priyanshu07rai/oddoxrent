@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Star, ChevronRight, Store, Truck, ShoppingCart, ShieldCheck, Clock, Shield } from 'lucide-react';
@@ -25,11 +25,47 @@ const ProductDetailPage = () => {
   const [selectedPricing, setSelectedPricing] = useState(null);
   const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [activeTab, setActiveTab] = useState('description');
+  const [rentedInfo, setRentedInfo] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => productsApi.getProduct(slug)
   });
+
+  const product = data?.data;
+
+  // Dynamic stock & availability countdown calculation
+  useEffect(() => {
+    if (!product) return;
+    try {
+      const stored = localStorage.getItem('rentos_placed_orders');
+      if (stored) {
+        const orders = JSON.parse(stored);
+        const activeOrder = orders.find(o => {
+          const pName = o.product?.name || o.items?.[0]?.product?.name || '';
+          return pName.toLowerCase().includes(product.name.toLowerCase()) || 
+                 product.name.toLowerCase().includes(pName.toLowerCase()) ||
+                 o.product_id === product.id;
+        });
+
+        if (activeOrder && activeOrder.end_date) {
+          const endMs = new Date(activeOrder.end_date).getTime();
+          const nowMs = Date.now();
+          const diffMs = endMs - nowMs;
+
+          if (diffMs > 0) {
+            const hours = Math.floor(diffMs / 3600000);
+            const mins = Math.floor((diffMs % 3600000) / 60000);
+            setRentedInfo({ hours, mins });
+          } else {
+            setRentedInfo({ hours: 2, mins: 45 });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Stock status check warning', e);
+    }
+  }, [product]);
 
   if (isLoading) {
     return (
@@ -47,7 +83,7 @@ const ProductDetailPage = () => {
     );
   }
 
-  if (isError || !data?.data) {
+  if (isError || !product) {
     return (
       <PageTransition>
         <div className="max-w-7xl mx-auto px-4 py-20">
@@ -57,7 +93,6 @@ const ProductDetailPage = () => {
     );
   }
 
-  const product = data.data;
   const categoryName = product.category_name || product.category?.name || product.category || 'Equipment';
 
   const galleryImages = (product.images && product.images.length > 0)
@@ -101,9 +136,17 @@ const ProductDetailPage = () => {
 
             <div className="flex items-center justify-between gap-2 mb-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-text leading-tight">{product.name}</h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20 shrink-0">
-                <ShieldCheck className="w-3.5 h-3.5" /> In Stock
-              </span>
+              
+              {/* Dynamic Availability Header Badge */}
+              {rentedInfo ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-amber-300 border border-amber-400/40 shadow-sm shrink-0">
+                  <Clock className="w-4 h-4 text-amber-400 animate-pulse" /> Available in {rentedInfo.hours}h {rentedInfo.mins}m
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-success/10 text-success border border-success/20 shrink-0">
+                  <ShieldCheck className="w-4 h-4" /> In Stock
+                </span>
+              )}
             </div>
             
             {product.rating > 0 && (
