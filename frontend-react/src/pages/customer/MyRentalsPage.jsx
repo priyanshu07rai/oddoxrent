@@ -8,24 +8,71 @@ import Skeleton from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import * as rentalsApi from '../../api/rentals';
 
+const sampleProductMap = {
+  1: { name: 'Sony FX3 Cinema Camera Kit', price: 2500, deposit: 10000, category: 'Cameras & Video' },
+  2: { name: 'Apple MacBook Pro 16" M3 Max', price: 3000, deposit: 15000, category: 'Electronics' },
+  3: { name: 'Super73-RX Electric Adventure Bike', price: 1800, deposit: 5000, category: 'Vehicles & E-Bikes' },
+  4: { name: 'DJI Inspire 3 Cinema Drone 8K', price: 8000, deposit: 25000, category: 'Cameras & Video' },
+  5: { name: 'Herman Miller Aeron Ergonomic Chair', price: 600, deposit: 3000, category: 'Office Furniture' },
+  6: { name: 'JBL PartyBox Ultimate PA System', price: 2000, deposit: 8000, category: 'Audio & Sound' },
+  7: { name: 'EcoFlow Delta Pro Power Station', price: 1500, deposit: 6000, category: 'Event & Outdoor' },
+  8: { name: 'Apple Vision Pro 512GB VR Headset', price: 4000, deposit: 20000, category: 'Electronics' }
+};
+
 const MyRentalsPage = () => {
   const [activeTab, setActiveTab] = useState('active');
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-rentals'],
-    queryFn: () => rentalsApi.getMyRentals()
+    queryFn: () => rentalsApi.getMyRentals(),
+    retry: false
   });
 
-  const rentals = data?.data || [];
+  // Read local orders placed in guest/demo session
+  let localOrders = [];
+  try {
+    const stored = localStorage.getItem('rentos_placed_orders');
+    if (stored) localOrders = JSON.parse(stored);
+  } catch (e) {
+    console.warn('LocalStorage read error', e);
+  }
+
+  const apiRentals = data?.data || [];
+  
+  // Combine API rentals and local orders
+  const combined = [...localOrders, ...apiRentals];
+  
+  // Deduplicate by ID
+  const uniqueMap = new Map();
+  combined.forEach(item => {
+    if (item && item.id && !uniqueMap.has(item.id)) {
+      uniqueMap.set(item.id, item);
+    }
+  });
+
+  const rentals = Array.from(uniqueMap.values()).map(r => {
+    // Format rental object so RentalCard renders cleanly
+    const prod = r.product || r.items?.[0]?.product || sampleProductMap[3];
+    return {
+      ...r,
+      order_number: r.order_number || r.id,
+      status: r.status || 'active',
+      start_date: r.start_date || new Date().toISOString().split('T')[0],
+      end_date: r.end_date || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+      total_price: r.total_price || r.total_amount || 6800,
+      product: typeof prod === 'object' ? prod : { name: sampleProductMap[prod]?.name || 'Super73-RX Electric Adventure Bike' }
+    };
+  });
 
   const tabs = [
-    { id: 'active', label: 'Active', filter: r => r.status === 'active' },
-    { id: 'upcoming', label: 'Upcoming', filter: r => ['confirmed', 'pickup_scheduled', 'booked', 'delivery'].includes(r.status) },
+    { id: 'active', label: 'Active', filter: r => ['active', 'confirmed', 'pickup_scheduled'].includes(r.status) },
+    { id: 'upcoming', label: 'Upcoming', filter: r => ['confirmed', 'pickup_scheduled', 'booked'].includes(r.status) },
     { id: 'past', label: 'Past', filter: r => ['completed', 'returned', 'inspected', 'settled'].includes(r.status) },
     { id: 'overdue', label: 'Overdue', filter: r => r.status === 'overdue' || r.is_overdue }
   ];
 
-  const filteredRentals = rentals.filter(tabs.find(t => t.id === activeTab).filter);
+  const currentTabObj = tabs.find(t => t.id === activeTab) || tabs[0];
+  const filteredRentals = rentals.filter(currentTabObj.filter);
 
   const getTabCounts = () => {
     const counts = {};
@@ -38,12 +85,11 @@ const MyRentalsPage = () => {
   const counts = getTabCounts();
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoading && rentals.length === 0) {
       return (
         <div className="grid gap-4">
-          <Skeleton className="w-full h-32 rounded-2xl" />
-          <Skeleton className="w-full h-32 rounded-2xl" />
-          <Skeleton className="w-full h-32 rounded-2xl" />
+          <Skeleton className="w-full h-32 rounded-3xl" />
+          <Skeleton className="w-full h-32 rounded-3xl" />
         </div>
       );
     }
@@ -60,7 +106,7 @@ const MyRentalsPage = () => {
       }
       return (
         <EmptyState 
-          icon={<Calendar className="w-12 h-12 text-muted" />}
+          icon={<Calendar className="w-12 h-12 text-text-muted" />}
           title={`No ${activeTab} rentals`}
           description="You don't have any rentals in this category."
         />
@@ -88,23 +134,25 @@ const MyRentalsPage = () => {
 
   return (
     <PageTransition>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">My Rentals</h1>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <h1 className="text-3xl font-extrabold text-text mb-8">My Rentals</h1>
         
         {/* Tab Bar */}
-        <div className="flex overflow-x-auto gap-2 mb-8 border-b border-subtle pb-4 scrollbar-hide">
+        <div className="flex overflow-x-auto gap-2 mb-8 border-b border-border pb-4 scrollbar-hide">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                ${activeTab === tab.id ? 'bg-text text-bg' : 'bg-elevated text-muted hover:text-text hover:bg-subtle border border-subtle'}
+                flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-extrabold transition-all whitespace-nowrap
+                ${activeTab === tab.id 
+                  ? 'bg-accent text-white shadow-sm' 
+                  : 'bg-bg-elevated text-text-muted hover:text-text hover:bg-bg-subtle border border-border'}
               `}
             >
               {tab.label}
               {counts[tab.id] > 0 && (
-                <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === tab.id ? 'bg-bg text-text' : 'bg-subtle text-text'}`}>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-black ${activeTab === tab.id ? 'bg-white text-accent' : 'bg-bg-subtle text-text'}`}>
                   {counts[tab.id]}
                 </span>
               )}
