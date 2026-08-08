@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Sun, Moon, ArrowLeft, Building2, Upload, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Sun, Moon, ArrowLeft, Building2, User, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useAuth from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
@@ -133,17 +133,34 @@ const VendorRegisterPage = () => {
         transition={{ duration: 0.4 }}
         className="w-full max-w-xl mx-auto z-10 mt-8"
       >
-        {/* Title Heading */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl sm:text-4xl font-black text-text tracking-tight mb-2">Vendor Sign-up Page</h1>
-          <p className="text-xs sm:text-sm font-semibold text-text-muted">
-            Partner with RentOS to list equipment, manage inventory & accept rental bookings
-          </p>
+        {/* Top 2-Segment Control for Customer vs Vendor */}
+        <div className="flex bg-bg-elevated p-1.5 rounded-2xl border-2 border-border-strong mb-6 shadow-sm">
+          <button
+            type="button"
+            onClick={() => navigate('/register')}
+            className="flex-1 py-3 rounded-xl text-xs font-black text-text-muted hover:text-text transition-all flex items-center justify-center gap-2"
+          >
+            <User className="w-4 h-4" /> Customer Sign-up
+          </button>
+
+          <button
+            type="button"
+            className="flex-1 py-3 rounded-xl text-xs font-black bg-accent text-white shadow-md flex items-center justify-center gap-2"
+          >
+            <Building2 className="w-4 h-4" /> Vendor Sign-up
+          </button>
         </div>
 
         {/* Vendor Sign-up Card */}
-        <div className="bg-bg-elevated border-2 border-border-strong rounded-3xl p-6 sm:p-8 shadow-xl relative">
+        <div className="bg-bg-elevated border-2 border-border-strong rounded-3xl p-6 sm:p-8 shadow-2xl relative">
           
+          <div className="text-center mb-6">
+            <h1 className="text-2xl sm:text-3xl font-black text-text tracking-tight mb-1">Vendor Sign-up Page</h1>
+            <p className="text-xs font-semibold text-text-muted">
+              Partner with RentOS to list equipment, manage inventory & accept rental bookings
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* Logo / Avatar Upload Box */}
@@ -303,26 +320,26 @@ const VendorRegisterPage = () => {
 
             {/* Register Submit Button */}
             <div className="pt-4">
-              <Button
+              <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-2xl font-black text-base bg-accent text-white hover:bg-accent-hover shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl font-black text-sm bg-accent text-white hover:bg-accent-hover shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>Register Vendor Account</>
                 )}
-              </Button>
+              </button>
             </div>
 
           </form>
 
           {/* Switch to Customer Sign up */}
           <div className="mt-6 text-center text-xs font-semibold text-text-muted border-t border-border pt-4">
-            Looking for a customer account?{' '}
-            <Link to="/register" className="font-extrabold text-accent hover:underline">
-              Customer Sign up
+            Already have a vendor account?{' '}
+            <Link to="/login" className="font-black text-accent hover:underline">
+              Vendor Login
             </Link>
           </div>
 

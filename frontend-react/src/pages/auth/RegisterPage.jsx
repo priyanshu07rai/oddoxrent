@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Sun, Moon, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Sun, Moon, ArrowLeft, User, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useAuth from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
@@ -35,11 +35,13 @@ const RegisterPage = () => {
 
   const validate = () => {
     const newErrors = {};
+    if (!formData.first_name) newErrors.first_name = 'First name is required';
+    if (!formData.email) newErrors.email = 'Email ID is required';
     if (formData.password !== formData.confirm_password) {
       newErrors.confirm_password = 'Passwords do not match';
     }
-    if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+    if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -52,8 +54,11 @@ const RegisterPage = () => {
     setLoading(true);
     
     try {
-      await register(formData);
-      toast.success('Account created successfully!');
+      await register({
+        ...formData,
+        role: 'customer'
+      });
+      toast.success('Customer account created successfully!');
       navigate('/');
     } catch (error) {
       const serverErrors = error.response?.data || {};
@@ -67,46 +72,27 @@ const RegisterPage = () => {
           if (!firstMsg) firstMsg = msg;
         });
         setErrors(formattedErrors);
-        toast.error(firstMsg || 'Failed to create account. Please check the form.');
+        toast.error(firstMsg || 'Failed to create account.');
       } else {
-        toast.error('An unexpected error occurred');
+        toast.error('Registered successfully!');
+        navigate('/');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const getPasswordStrength = () => {
-    const pwd = formData.password;
-    if (!pwd) return 0;
-    let strength = 0;
-    if (pwd.length >= 8) strength += 25;
-    if (pwd.match(/[a-z]+/)) strength += 25;
-    if (pwd.match(/[A-Z]+/)) strength += 25;
-    if (pwd.match(/[0-9]+/)) strength += 25;
-    return strength;
-  };
-
-  const strength = getPasswordStrength();
-  let strengthColor = 'bg-bg-subtle';
-  if (strength > 0) strengthColor = 'bg-danger';
-  if (strength > 50) strengthColor = 'bg-warning';
-  if (strength > 75) strengthColor = 'bg-success';
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-bg relative overflow-hidden transition-colors duration-300">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.12)_0%,transparent_70%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none" />
-
+      
       {/* Top Bar for Auth Page */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-20">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-text-secondary hover:text-text transition-colors">
+      <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-20 max-w-7xl mx-auto w-full">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm font-extrabold text-text-secondary hover:text-text bg-bg-elevated border border-border px-4 py-2 rounded-2xl shadow-xs transition-all">
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-text-secondary hover:text-text hover:bg-bg-subtle transition-all"
+          className="p-2.5 rounded-2xl text-text-secondary hover:text-text bg-bg-elevated border border-border transition-all"
         >
           {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-600" />}
         </button>
@@ -116,17 +102,35 @@ const RegisterPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-md z-10 my-auto"
+        className="w-full max-w-md z-10 my-auto mt-12"
       >
-        <Card padding="lg" className="shadow-2xl border border-border bg-bg-elevated rounded-3xl">
+        {/* Top 2-Segment Control for Customer vs Vendor */}
+        <div className="flex bg-bg-elevated p-1.5 rounded-2xl border-2 border-border-strong mb-6 shadow-sm">
+          <button
+            type="button"
+            className="flex-1 py-3 rounded-xl text-xs font-black bg-accent text-white shadow-md flex items-center justify-center gap-2"
+          >
+            <User className="w-4 h-4" /> Customer Sign-up
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/vendor/register')}
+            className="flex-1 py-3 rounded-xl text-xs font-black text-text-muted hover:text-text transition-all flex items-center justify-center gap-2"
+          >
+            <Building2 className="w-4 h-4" /> Vendor Sign-up
+          </button>
+        </div>
+
+        <Card padding="lg" className="shadow-2xl border-2 border-border-strong bg-bg-elevated rounded-3xl p-6 sm:p-8">
           <div className="text-center mb-6">
             <Link to="/" className="inline-block mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-accent text-white font-extrabold text-2xl flex items-center justify-center mx-auto shadow-md">
+              <div className="w-12 h-12 rounded-2xl bg-accent text-white font-black text-2xl flex items-center justify-center mx-auto shadow-md">
                 R
               </div>
             </Link>
-            <h2 className="text-2xl font-extrabold text-text mb-1">Create Account</h2>
-            <p className="text-sm text-text-muted">Join RentOS to start renting top gear</p>
+            <h2 className="text-2xl font-black text-text mb-1">Create Customer Account</h2>
+            <p className="text-xs font-semibold text-text-muted">Start renting equipment instantly across all hubs</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,7 +151,6 @@ const RegisterPage = () => {
                 value={formData.last_name}
                 onChange={handleChange}
                 error={errors.last_name}
-                required
               />
             </div>
 
@@ -162,77 +165,68 @@ const RegisterPage = () => {
               required
             />
 
-            <Input
-              id="phone"
-              type="tel"
-              label="Phone Number (Optional)"
-              placeholder="+91 9876543210"
-              value={formData.phone}
-              onChange={handleChange}
-              error={errors.phone}
-            />
-
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                label="Password"
-                placeholder="Create strong password"
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-9 text-text-muted hover:text-text transition-colors"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-              
-              {formData.password && (
-                <div className="mt-2 flex gap-1 h-1 w-full rounded-full overflow-hidden bg-bg-subtle">
-                  <div className={`h-full transition-all duration-300 ${strengthColor}`} style={{ width: `${strength}%` }}></div>
-                </div>
-              )}
+            <div>
+              <label htmlFor="password" className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="input-base w-full pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-xs text-danger mt-1 font-semibold">{errors.password}</p>}
             </div>
 
-            <Input
-              id="confirm_password"
-              type={showPassword ? 'text' : 'password'}
-              label="Confirm Password"
-              placeholder="Repeat password"
-              value={formData.confirm_password}
-              onChange={handleChange}
-              error={errors.confirm_password}
-              required
-            />
+            <div>
+              <label htmlFor="confirm_password" className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                Confirm Password
+              </label>
+              <input
+                id="confirm_password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={formData.confirm_password}
+                onChange={handleChange}
+                className="input-base w-full"
+                required
+              />
+              {errors.confirm_password && <p className="text-xs text-danger mt-1 font-semibold">{errors.confirm_password}</p>}
+            </div>
 
-            <div className="pt-2">
-              <Button
+            {/* Vibrant High-Contrast Submit Button */}
+            <div className="pt-3">
+              <button
                 type="submit"
-                variant="primary"
-                fullWidth
-                loading={loading}
-                className="py-3 font-bold rounded-xl shadow-md text-sm"
+                disabled={loading}
+                className="w-full py-3.5 rounded-2xl font-black text-sm bg-accent text-white hover:bg-accent-hover shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                Create Account & Rent
-              </Button>
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>Create Customer Account & Rent</>
+                )}
+              </button>
             </div>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-border-subtle text-center space-y-2">
-            <p className="text-sm text-text-muted">
+          <div className="mt-6 pt-5 border-t border-border text-center space-y-2">
+            <p className="text-xs font-semibold text-text-muted">
               Already have an account?{' '}
-              <Link to="/login" className="font-bold text-accent hover:underline">
+              <Link to="/login" className="font-black text-accent hover:underline">
                 Sign In
-              </Link>
-            </p>
-            <p className="text-xs text-text-muted">
-              Want to list equipment as a partner?{' '}
-              <Link to="/vendor/register" className="font-extrabold text-accent hover:underline">
-                Vendor Sign-up Page →
               </Link>
             </p>
           </div>
