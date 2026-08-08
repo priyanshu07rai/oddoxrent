@@ -222,11 +222,17 @@ const RegisterPage = () => {
             </div>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-border-subtle text-center">
+          <div className="mt-6 pt-5 border-t border-border-subtle text-center space-y-2">
             <p className="text-sm text-text-muted">
               Already have an account?{' '}
               <Link to="/login" className="font-bold text-accent hover:underline">
                 Sign In
+              </Link>
+            </p>
+            <p className="text-xs text-text-muted">
+              Want to list equipment as a partner?{' '}
+              <Link to="/vendor/register" className="font-extrabold text-accent hover:underline">
+                Vendor Sign-up Page →
               </Link>
             </p>
           </div>

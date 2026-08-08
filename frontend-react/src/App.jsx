@@ -23,6 +23,7 @@ const AccountPage = React.lazy(() => import('./pages/customer/AccountPage'));
 
 const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = React.lazy(() => import('./pages/auth/RegisterPage'));
+const VendorRegisterPage = React.lazy(() => import('./pages/auth/VendorRegisterPage'));
 
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout'));
 const DashboardPage = React.lazy(() => import('./pages/admin/DashboardPage'));
@@ -88,6 +89,11 @@ function App() {
                 <Route path="/register" element={
                   <Suspense fallback={null}>
                     <PageTransition><RegisterPage /></PageTransition>
+                  </Suspense>
+                } />
+                <Route path="/vendor/register" element={
+                  <Suspense fallback={null}>
+                    <PageTransition><VendorRegisterPage /></PageTransition>
                   </Suspense>
                 } />
 
